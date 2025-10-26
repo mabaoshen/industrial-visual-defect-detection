@@ -30,10 +30,10 @@ TARGET_SIZE = (576, 576)
 BATCH_SIZE = 1
 EPOCHS = 30
 NUM_CLASSES = 1
-TRAIN_DIR = "D:/pythonCode/1/dataset/train"
-VAL_DIR = "D:/pythonCode/1/dataset/val"
-MODEL_SAVE_PATH = "D:/pythonCode/1/best_model.h5"
-LOCAL_WEIGHTS_PATH = "D:/pythonCode/1/weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_0.5_128_no_top.h5"
+TRAIN_DIR = "dataset/train"
+VAL_DIR = "dataset/val"
+MODEL_SAVE_PATH = "best_model.h5"
+LOCAL_WEIGHTS_PATH = "weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_0.5_128_no_top.h5"
 
 
 # 损失函数定义

@@ -1,0 +1,7 @@
+# requirements.txt（修改后，兼容 Python 3.9，无依赖冲突）
+flask==2.0.1
+tensorflow==2.10.0  # 替换 2.8.0，避免 nightly 依赖
+opencv-python==4.8.0.76  # 替换 4.5.5.64，兼容 numpy 1.26.4
+numpy==1.26.4  # 替换 1.22.3，兼容 TensorFlow 2.10.0
+ultralytics==8.0.12
+werkzeug==2.0.1

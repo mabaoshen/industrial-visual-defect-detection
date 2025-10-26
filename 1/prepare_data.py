@@ -217,11 +217,11 @@ def split_dataset(image_dir, mask_dir, train_dir, val_dir):
 
 if __name__ == "__main__":
     # 路径配置（保持原有项目结构）
-    IMAGE_DIR = "D:/pythonCode/1/original_images"
-    JSON_DIR = "D:/pythonCode/1/annotations"
-    MASK_DIR = "D:/pythonCode/1/masks"
-    TRAIN_DIR = "D:/pythonCode/1/dataset/train"
-    VAL_DIR = "D:/pythonCode/1/dataset/val"
+    IMAGE_DIR = "original_images"
+    JSON_DIR = "annotations"
+    MASK_DIR = "masks"
+    TRAIN_DIR = "dataset/train"
+    VAL_DIR = "dataset/val"
 
     # 生成掩码
     print("=" * 50)

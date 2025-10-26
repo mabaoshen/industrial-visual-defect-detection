@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工业检测系统</title>
+    <!-- 使用内联样式替代外部Bootstrap以避免网络问题 -->
+    <style>
+        /* 基本样式 */
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #2c3e50; color: white; padding: 20px 0; text-align: center; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .header h1 { margin: 0; font-size: 2.5rem; }
+        .card { border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 20px; border: 1px solid #ddd; }
+        .card-header { background-color: #3498db; color: white; font-weight: bold; padding: 15px; font-size: 1.2rem; }
+        .card-body { padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-primary { background-color: #3498db; border: none; padding: 10px 20px; font-size: 1.1rem; transition: background-color 0.3s ease; color: white; cursor: pointer; }
+        .btn-primary:hover { background-color: #2980b9; }
+        
+        /* 结果展示样式 - 优化横向排列 */
+        .image-container { text-align: center; margin-top: 20px; }
+        .image-container img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .result-section { margin-top: 30px; }
+        .result-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; text-align: center; }
+        
+        /* 横向布局样式 */
+        .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
+        .col-md-6 { 
+            flex: 0 0 50%; 
+            max-width: 50%; 
+            padding-right: 15px; 
+            padding-left: 15px; 
+            box-sizing: border-box;
+        }
+        
+        /* 提示框样式 */
+        .alert { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .alert-info { background-color: #d9edf7; border-color: #bce8f1; color: #31708f; }
+        .alert-success { background-color: #dff0d8; border-color: #d6e9c6; color: #3c763d; }
+        .alert-warning { background-color: #fcf8e3; border-color: #faebcc; color: #8a6d3b; }
+        .alert-danger { background-color: #f2dede; border-color: #ebccd1; color: #a94442; }
+        
+        /* 其他样式 */
+        .process-type { margin-bottom: 20px; }
+        .process-type label { margin-right: 20px; }
+        .form-check { margin-bottom: 10px; }
+        .form-check-input { margin-right: 8px; }
+        .text-warning { color: #8a6d3b; }
+        .mt-2 { margin-top: 8px; }
+        .small { font-size: 0.875em; }
+        .text-muted { color: #777; }
+        strong { font-weight: bold; }
+        
+        /* 响应式布局 */
+        @media (max-width: 768px) { 
+            .header h1 { font-size: 1.8rem; } 
+            .card-header { font-size: 1rem; } 
+            .col-md-6 { 
+                flex: 0 0 100%; 
+                max-width: 100%; 
+            } 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>工业缺陷检测系统</h1>
+            <p>集成图像分割与目标检测技术</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                上传图像
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">选择图像文件</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                    </div>
+                    
+                    <div class="process-type">
+                        <p>选择处理类型：</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="process_type" id="segmentation" value="segmentation" checked>
+                            <label class="form-check-label" for="segmentation">图像分割（缺陷区域标注）</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="process_type" id="detection" value="detection">
+                            <label class="form-check-label" for="detection">目标检测（裂缝识别）</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">处理图像</button>
+                </form>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-warning" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- 系统状态提示 -->
+        <div class="alert alert-info" role="alert">
+            <strong>系统状态：</strong>
+            {% if result_type == 'segmentation' %}
+                正在执行图像分割处理。
+            {% elif result_type == 'detection' %}
+                正在执行目标检测处理。
+                {% if is_model_not_loaded %}
+                    <span class="text-warning">(目标检测模型未加载)</span>
+                {% endif %}
+            {% else %}
+                系统准备就绪，请上传图像并选择处理类型。
+            {% endif %}
+        </div>
+        
+        {% if original_image and result_image %}
+        <div class="result-section">
+            <h2 class="result-title">处理结果</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="result-title">原始图像</h3>
+                    <div class="image-container">
+                        <img src="{{ original_image }}" alt="原始图像">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="result-title">
+                        {% if result_type == 'segmentation' %}分割结果
+                        {% else %}检测结果
+                        {% endif %}
+                    </h3>
+                    <div class="image-container">
+                        <img src="{{ result_image }}" alt="处理结果">
+                    </div>
+                </div>
+            </div>
+            {% if message %}
+            <div class="alert {% if success %}alert-success{% elif is_model_not_loaded %}alert-warning{% else %}alert-danger{% endif %}" role="alert">
+                {{ message }}
+                {% if is_model_not_loaded %}
+                <div class="mt-2">
+                    <small class="text-muted">提示：目标检测模型未加载，但图像分割功能仍然可用。</small>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if not message and result_type %}
+            <!-- 默认状态提示 -->
+            <div class="alert alert-info" role="alert">
+                {% if result_type == 'segmentation' %}
+                    图像分割处理完成。
+                {% elif result_type == 'detection' %}
+                    {% if success %}
+                        目标检测处理完成。
+                    {% else %}
+                        目标检测处理异常。
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
