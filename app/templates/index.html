@@ -3,72 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工业检测系统</title>
+    <title>工业缺陷检测系统</title>
     <!-- 使用内联样式替代外部Bootstrap以避免网络问题 -->
     <style>
+        /* 全局样式重置 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         /* 基本样式 */
-        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2c3e50; color: white; padding: 20px 0; text-align: center; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .header h1 { margin: 0; font-size: 2.5rem; }
-        .card { border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 20px; border: 1px solid #ddd; }
-        .card-header { background-color: #3498db; color: white; font-weight: bold; padding: 15px; font-size: 1.2rem; }
-        .card-body { padding: 20px; }
-        .form-group { margin-bottom: 20px; }
-        .form-control { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
-        .btn-primary { background-color: #3498db; border: none; padding: 10px 20px; font-size: 1.1rem; transition: background-color 0.3s ease; color: white; cursor: pointer; }
-        .btn-primary:hover { background-color: #2980b9; }
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            --text-color: #333;
+            --text-light: #777;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
         
-        /* 结果展示样式 - 优化横向排列 */
-        .image-container { text-align: center; margin-top: 20px; }
-        .image-container img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .result-section { margin-top: 30px; }
-        .result-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; text-align: center; }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-image: radial-gradient(#e1e9f0 1px, transparent 0);
+            background-size: 20px 20px;
+        }
         
-        /* 横向布局样式 */
-        .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-        .col-md-6 { 
-            flex: 0 0 50%; 
-            max-width: 50%; 
-            padding-right: 15px; 
-            padding-left: 15px; 
-            box-sizing: border-box;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        .header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+            animation: patternMove 20s linear infinite;
+        }
+        
+        @keyframes patternMove {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            font-weight: 600;
+            padding: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* 文件上传样式 */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-upload-text {
+            background-color: white;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        
+        .file-upload-wrapper:hover .file-upload-text {
+            border-color: var(--primary-color);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219a52;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        /* 单选按钮样式 */
+        .process-type {
+            margin-bottom: 25px;
+        }
+        
+        .process-type p {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .form-check {
+            display: block;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .form-check-input {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .form-check-label {
+            display: block;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .form-check-label:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .form-check-input:checked + .form-check-label {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-check-label::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .form-check-input:checked + .form-check-label::before {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+        }
+        
+        .form-check-input:checked + .form-check-label::after {
+            content: '';
+            position: absolute;
+            left: 26px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
         }
         
         /* 提示框样式 */
-        .alert { margin-top: 20px; padding: 15px; border-radius: 4px; }
-        .alert-info { background-color: #d9edf7; border-color: #bce8f1; color: #31708f; }
-        .alert-success { background-color: #dff0d8; border-color: #d6e9c6; color: #3c763d; }
-        .alert-warning { background-color: #fcf8e3; border-color: #faebcc; color: #8a6d3b; }
-        .alert-danger { background-color: #f2dede; border-color: #ebccd1; color: #a94442; }
+        .alert {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background-color: white;
+            box-shadow: var(--box-shadow);
+        }
         
-        /* 其他样式 */
-        .process-type { margin-bottom: 20px; }
-        .process-type label { margin-right: 20px; }
-        .form-check { margin-bottom: 10px; }
-        .form-check-input { margin-right: 8px; }
-        .text-warning { color: #8a6d3b; }
-        .mt-2 { margin-top: 8px; }
-        .small { font-size: 0.875em; }
-        .text-muted { color: #777; }
-        strong { font-weight: bold; }
+        .alert-info {
+            border-left-color: var(--info-color);
+            color: #2980b9;
+        }
         
-        /* 响应式布局 */
-        @media (max-width: 768px) { 
-            .header h1 { font-size: 1.8rem; } 
-            .card-header { font-size: 1rem; } 
-            .col-md-6 { 
-                flex: 0 0 100%; 
-                max-width: 100%; 
-            } 
+        .alert-success {
+            border-left-color: var(--success-color);
+            color: #219a52;
+        }
+        
+        .alert-warning {
+            border-left-color: var(--warning-color);
+            color: #d35400;
+        }
+        
+        .alert-danger {
+            border-left-color: var(--danger-color);
+            color: #c0392b;
+        }
+        
+        /* 结果展示样式 */
+        .result-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .result-title {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .result-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), transparent);
+        }
+        
+        /* 网格布局 */
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* 图像容器 */
+        .image-container {
+            background-color: #fafbfc;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+        
+        .image-container:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+        
+        .image-caption {
+            padding: 15px;
+            background-color: white;
+            text-align: center;
+            font-weight: 500;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        /* 下载按钮容器 */
+        .download-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 状态图标 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.active {
+            background-color: var(--success-color);
+        }
+        
+        .status-dot.warning {
+            background-color: var(--warning-color);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 30px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .form-check-label {
+                padding: 12px 15px 12px 45px;
+            }
+            
+            .row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .result-title {
+                font-size: 1.5rem;
+            }
+            
+            .download-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 微交互效果 */
+        .btn span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e1e5e9, transparent);
+            margin: 30px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>工业缺陷检测系统</h1>
-            <p>集成图像分割与目标检测技术</p>
+            <div class="header-content">
+                <h1>工业缺陷检测系统</h1>
+                <p>集成图像分割与目标检测技术的智能分析平台</p>
+            </div>
         </div>
         
         <div class="card">
@@ -76,25 +562,32 @@
                 上传图像
             </div>
             <div class="card-body">
-                <form method="POST" action="/upload" enctype="multipart/form-data">
+                <form method="POST" action="/upload" enctype="multipart/form-data" class="upload-form">
                     <div class="form-group">
                         <label for="file">选择图像文件</label>
-                        <input type="file" class="form-control" id="file" name="file" required>
+                        <div class="file-upload-wrapper">
+                            <input type="file" class="form-control" id="file" name="file" required>
+                            <div class="file-upload-text">点击或拖拽文件到此处上传</div>
+                        </div>
                     </div>
                     
                     <div class="process-type">
                         <p>选择处理类型：</p>
-                        <div class="form-check form-check-inline">
+                        <div class="form-check">
                             <input class="form-check-input" type="radio" name="process_type" id="segmentation" value="segmentation" checked>
                             <label class="form-check-label" for="segmentation">图像分割（缺陷区域标注）</label>
                         </div>
-                        <div class="form-check form-check-inline">
+                        <div class="form-check">
                             <input class="form-check-input" type="radio" name="process_type" id="detection" value="detection">
                             <label class="form-check-label" for="detection">目标检测（裂缝识别）</label>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">处理图像</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span>
+                            处理图像
+                        </span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -110,17 +603,50 @@
         {% endwith %}
         
         <!-- 系统状态提示 -->
-        <div class="alert alert-info" role="alert">
-            <strong>系统状态：</strong>
-            {% if result_type == 'segmentation' %}
-                正在执行图像分割处理。
-            {% elif result_type == 'detection' %}
-                正在执行目标检测处理。
-                {% if is_model_not_loaded %}
-                    <span class="text-warning">(目标检测模型未加载)</span>
+        <div class="alert {% if system_status == 'ready' %}alert-info{% elif system_status == 'processing' %}alert-warning{% elif system_status == 'completed' %}alert-success{% elif system_status == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
+            <strong style="font-size: 1.1em;">系统状态：</strong>
+            {% if system_status == 'ready' %}
+                <span style="font-weight: bold;">准备就绪</span>
+                <span class="status-indicator">
+                    <span class="status-dot" style="background-color: #3498db; animation: none !important;"></span>
+                    <span class="status-text" style="color: #3498db; font-weight: 600;">空闲</span>
+                </span>
+                <span style="margin-left: 10px; font-size: 0.95em; color: #555;">请上传图像并选择处理类型</span>
+            {% elif system_status == 'processing' %}
+                {% if result_type == 'segmentation' %}
+                    <span style="font-weight: bold;">图像分割中...</span>
+                {% elif result_type == 'detection' %}
+                    <span style="font-weight: bold;">目标检测中...</span>
+                {% endif %}
+                <span class="status-indicator">
+                    <span class="status-dot active"></span>
+                    <span class="status-text" style="color: #f39c12; font-weight: 600;">处理中</span>
+                </span>
+                <span style="margin-left: 10px; font-size: 0.95em; color: #7f8c8d;">请稍候，系统正在分析图像...</span>
+            {% elif system_status == 'completed' %}
+                {% if result_type == 'segmentation' %}
+                    <span style="font-weight: bold;">图像分割处理完成</span>
+                {% elif result_type == 'detection' %}
+                    <span style="font-weight: bold;">目标检测处理完成</span>
+                {% endif %}
+                <span class="status-indicator">
+                    <span class="status-dot" style="background-color: #27ae60; animation: none !important;"></span>
+                    <span class="status-text" style="color: #27ae60; font-weight: 600;">已完成</span>
+                </span>
+                {% if message %}
+                    <span style="margin-left: 10px; font-size: 0.95em; color: #2c3e50;">{{ message }}</span>
+                {% endif %}
+            {% elif system_status == 'error' %}
+                <span style="font-weight: bold;">处理异常</span>
+                <span class="status-indicator">
+                    <span class="status-dot" style="background-color: #e74c3c; animation: none !important;"></span>
+                    <span class="status-text" style="color: #e74c3c; font-weight: 600;">出错</span>
+                </span>
+                {% if message %}
+                    <span style="margin-left: 10px; font-size: 0.95em; color: #2c3e50;">{{ message }}</span>
                 {% endif %}
             {% else %}
-                系统准备就绪，请上传图像并选择处理类型。
+                系统准备就绪，请上传图像并选择处理类型
             {% endif %}
         </div>
         
@@ -128,23 +654,34 @@
         <div class="result-section">
             <h2 class="result-title">处理结果</h2>
             <div class="row">
-                <div class="col-md-6">
-                    <h3 class="result-title">原始图像</h3>
-                    <div class="image-container">
-                        <img src="{{ original_image }}" alt="原始图像">
-                    </div>
+                <div class="image-container">
+                    <div class="image-caption">原始图像</div>
+                    <img src="{{ original_image }}" alt="原始图像" loading="lazy">
                 </div>
-                <div class="col-md-6">
-                    <h3 class="result-title">
+                <div class="image-container">
+                    <div class="image-caption">
                         {% if result_type == 'segmentation' %}分割结果
                         {% else %}检测结果
                         {% endif %}
-                    </h3>
-                    <div class="image-container">
-                        <img src="{{ result_image }}" alt="处理结果">
                     </div>
+                    <img src="{{ result_image }}" alt="处理结果" loading="lazy">
                 </div>
             </div>
+            
+            <div class="divider"></div>
+            
+            <!-- 下载按钮区域 -->
+            <div class="download-container">
+                <a href="{{ url_for('download_result', filename=result_image.split('/')[-1]) }}" class="btn btn-primary tooltip">
+                    <span>下载结果图片</span>
+                    <span class="tooltiptext">保存处理后的图像</span>
+                </a>
+                <a href="{{ url_for('download_comparison', upload_folder='uploads', upload_filename=original_image.split('/')[-1], result_folder=(result_image.split('/')[-2] if '/' in result_image else 'segmentation_results'), result_filename=result_image.split('/')[-1]) }}" class="btn btn-success tooltip">
+                    <span>下载对比图片 (并排)</span>
+                    <span class="tooltiptext">保存原始和结果图像的对比</span>
+                </a>
+            </div>
+            
             {% if message %}
             <div class="alert {% if success %}alert-success{% elif is_model_not_loaded %}alert-warning{% else %}alert-danger{% endif %}" role="alert">
                 {{ message }}
@@ -160,12 +697,12 @@
             <!-- 默认状态提示 -->
             <div class="alert alert-info" role="alert">
                 {% if result_type == 'segmentation' %}
-                    图像分割处理完成。
+                    图像分割处理完成
                 {% elif result_type == 'detection' %}
                     {% if success %}
-                        目标检测处理完成。
+                        目标检测处理完成
                     {% else %}
-                        目标检测处理异常。
+                        目标检测处理异常
                     {% endif %}
                 {% endif %}
             </div>
@@ -173,5 +710,43 @@
         </div>
         {% endif %}
     </div>
+
+    <!-- 添加简单的JS交互 -->
+    <script>
+        // 文件上传预览
+        document.querySelector('.file-upload-wrapper input[type="file"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const textElement = this.parentNode.querySelector('.file-upload-text');
+                textElement.textContent = `已选择文件: ${file.name}`;
+                textElement.style.color = '#27ae60';
+                setTimeout(() => {
+                    textElement.style.color = '';
+                }, 2000);
+            }
+        });
+        
+        // 表单提交动画
+        document.querySelector('.upload-form').addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span><div class="loading"></div>处理中...</span>';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.8';
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ 
+                        behavior: 'smooth' 
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
