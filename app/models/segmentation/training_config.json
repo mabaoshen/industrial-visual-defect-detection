@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-11-11 01:30:16",
+  "training_type": "segmentation",
+  "params": {
+    "epochs": 50,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "image_size": 512
+  },
+  "label_mapping": {
+    "0": "liefeng"
+  },
+  "results": {
+    "loss": 0.087,
+    "accuracy": 94.2,
+    "miou": 0.876,
+    "f1_score": 0.912
+  },
+  "model_save_path": "1\\trained_model_20251111_013014.h5"
+}

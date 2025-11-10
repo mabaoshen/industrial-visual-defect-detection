@@ -8,6 +8,10 @@ from flask import current_app
 segmentation_model = None
 detection_model = None
 
+# 用户上传的自定义模型变量
+loaded_segmentation_model = None
+loaded_detection_model = None
+
 # 模型路径
 SEGMENTATION_MODEL_PATH = os.path.join('1', 'best_model.h5')
 DETECTION_MODEL_PATH = os.path.join('2', 'models', 'crack_detector_optimized', 'weights','best.pt')

@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-11-11 01:26:29",
+  "training_type": "detection",
+  "params": {
+    "epochs": 100,
+    "batch_size": 4,
+    "learning_rate": 0.0001,
+    "image_size": 640
+  },
+  "label_mapping": {
+    "0": "liefeng"
+  },
+  "results": {
+    "loss": 0.123,
+    "accuracy": 92.5,
+    "f1_score": 0.897
+  },
+  "model_save_path": "2\\models\\crack_detector_20251111_012627\\weights\\best.pt"
+}

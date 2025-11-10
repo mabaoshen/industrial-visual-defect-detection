@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工业缺陷检测系统</title>
+    <!-- Font Awesome图标库 -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- 使用内联样式替代外部Bootstrap以避免网络问题 -->
     <style>
         /* 全局样式重置 */
@@ -157,31 +159,100 @@
         .file-upload-wrapper {
             position: relative;
             overflow: hidden;
+            margin-bottom: 15px;
+            min-height: 60px;
         }
         
         .file-upload-wrapper input[type="file"] {
             position: absolute;
             top: 0;
-            right: 0;
-            min-width: 100%;
-            min-height: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
             font-size: 100px;
             opacity: 0;
             cursor: pointer;
+            z-index: 2;
+        }
+        
+        .file-upload-wrapper input[type="file"][webkitdirectory] {
+            /* 为WebKit浏览器中的文件夹上传添加特殊样式 */
         }
         
         .file-upload-text {
+            position: relative;
             background-color: white;
-            padding: 12px 16px;
+            padding: 18px 16px;
             border: 2px solid #e1e5e9;
             border-radius: 8px;
             text-align: center;
             transition: var(--transition);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
         }
         
         .file-upload-wrapper:hover .file-upload-text {
             border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
         }
+        
+        /* 间距和布局优化 */
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 1rem; }
+        .mt-4 { margin-top: 1.5rem; }
+        .mt-5 { margin-top: 2rem; }
+        
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .mb-5 { margin-bottom: 2rem; }
+        
+        /* 阴影和边框样式 */
+        .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 圆角大小 */
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        /* 文字样式 */
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-muted {
+            color: #6c757d;
+        }
+        
+        /* 按钮大小 */
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        /* 边框颜色 */
+        .border {
+            border: 1px solid #dee2e6;
+        }
+        
+        /* 上传类型选择样式 */
+        .upload-type-select {
+            margin-bottom: 25px;
+        }
+        
+        .upload-type-select p {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        /* 文件计数信息样式已完全移除 */
         
         /* 按钮样式 */
         .btn {
@@ -253,6 +324,7 @@
         .form-check-input {
             position: absolute;
             opacity: 0;
+            z-index: 1;
         }
         
         .form-check-label {
@@ -263,6 +335,41 @@
             cursor: pointer;
             transition: var(--transition);
             position: relative;
+            background-color: white;
+        }
+        
+        /* 添加单选按钮的视觉指示器 */
+        .form-check-label::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 50%;
+            background-color: white;
+            transition: var(--transition);
+        }
+        
+        /* 选中状态的指示器 */
+        .form-check-input:checked + .form-check-label::before {
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+        
+        /* 选中状态的中心圆点 */
+        .form-check-input:checked + .form-check-label::after {
+            content: '';
+            position: absolute;
+            left: 26px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
         }
         
         .form-check-label:hover {
@@ -275,18 +382,90 @@
             background-color: rgba(52, 152, 219, 0.1);
         }
         
-        .form-check-label::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            border: 2px solid #e1e5e9;
-            border-radius: 50%;
-            transition: var(--transition);
+        /* 辅助布局类 */
+        .d-flex {
+            display: flex;
         }
+        
+        .justify-content-between {
+            justify-content: space-between;
+        }
+        
+        .align-items-center {
+            align-items: center;
+        }
+        
+        .list-unstyled {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* 文件列表容器样式 */
+        #file-list-container {
+            max-height: 150px;
+            width: 100% !important;
+            min-width: 0 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        
+        /* 文件列表样式 */
+        #file-list {
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* 文件列表项样式 - 最高优先级 */
+        #file-list li {
+            display: block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 8px 12px !important;
+            margin-bottom: 4px !important;
+            border-radius: 4px !important;
+            background-color: #fafafa !important;
+            position: relative !important;
+        }
+        
+        /* 确保省略号正确显示 */
+        #file-list li * {
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+        
+        /* 文件列表样式优化 */
+        .file-list-header {
+            font-size: 0.95rem;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .hover\:bg-gray-50:hover {
+            background-color: #f9fafb;
+        }
+        
+        .transition-colors {
+            transition: background-color 0.2s ease;
+        }
+        
+        .bg-gray-50 {
+            background-color: #f9fafb;
+        }
+        
+        .border-gray-200 {
+            border-color: #e5e7eb;
+        }
+        
+        /* 绝对定位的文件计数信息样式已完全移除，避免内容错误显示 */
         
         .form-check-input:checked + .form-check-label::before {
             border-color: var(--primary-color);
@@ -443,6 +622,48 @@
             opacity: 1;
         }
         
+        /* 训练结果指标样式 */
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .metric-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .metric-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .plot-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
         /* 状态图标 */
         .status-indicator {
             display: inline-flex;
@@ -557,33 +778,237 @@
             </div>
         </div>
         
-        <div class="card">
+        <!-- 功能切换标签 -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: #f8f9fa; color: #333; padding: 15px 20px;">
+                <div class="d-flex gap-2">
+                    <button id="detection-tab" class="btn btn-primary">图像检测</button>
+                    <button id="training-tab" class="btn btn-outline-primary">模型训练</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图像检测面板 -->
+        <div id="detection-panel" class="card">
             <div class="card-header">
-                上传图像
+                上传图像与参数设置
             </div>
             <div class="card-body">
                 <form method="POST" action="/upload" enctype="multipart/form-data" class="upload-form">
-                    <div class="form-group">
-                        <label for="file">选择图像文件</label>
-                        <div class="file-upload-wrapper">
-                            <input type="file" class="form-control" id="file" name="file" required>
-                            <div class="file-upload-text">点击或拖拽文件到此处上传</div>
+                    <!-- 处理类型选择区域，移到最前面 -->
+                    <div class="process-type bg-white p-4 rounded-lg border shadow-sm" style="position: relative; z-index: 10; padding: 20px; border-radius: 8px; overflow: hidden; background-clip: padding-box;">
+                        <p class="font-weight-bold mb-3">选择处理类型：</p>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="process_type" id="segmentation" value="segmentation" checked onclick="toggleParamsPanel('segmentation')">
+                            <label class="form-check-label pl-2" for="segmentation">图像分割（缺陷区域标注）</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="process_type" id="detection" value="detection" onclick="toggleParamsPanel('detection')">
+                            <label class="form-check-label pl-2" for="detection">目标检测（裂缝识别）</label>
                         </div>
                     </div>
                     
-                    <div class="process-type">
-                        <p>选择处理类型：</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="process_type" id="segmentation" value="segmentation" checked>
-                            <label class="form-check-label" for="segmentation">图像分割（缺陷区域标注）</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="process_type" id="detection" value="detection">
-                            <label class="form-check-label" for="detection">目标检测（裂缝识别）</label>
+                    <!-- 模型选择区域 - 分割模型 -->
+                    <div id="segmentation-model-selection" class="bg-white p-4 rounded-lg border shadow-sm mt-4">
+                        <h4 class="text-primary mb-3">分割模型选择</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="segmentation_model" class="form-label">选择模型</label>
+                                <select class="form-control" id="segmentation_model" name="segmentation_model">
+                                    <option value="default">默认模型 (1/best_model.h5)</option>
+                                    <option value="custom">自定义模型上传</option>
+                                </select>
+                            </div>
+                            <div id="custom_seg_model_container" style="display: none;">
+                                <label class="form-label">上传自定义分割模型 (.h5)</label>
+                                <div class="custom-file-upload">
+                                    <input type="file" class="form-control" id="segmentation_model_file" name="segmentation_model_file" accept=".h5">
+                                    <button type="button" id="load_seg_model_btn" class="btn btn-success mt-2">加载模型</button>
+                                    <div id="seg_model_status" class="mt-2 text-sm"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">
+                    <!-- 模型选择区域 - 检测模型 -->
+                    <div id="detection-model-selection" class="bg-white p-4 rounded-lg border shadow-sm mt-4" style="display: none;">
+                        <h4 class="text-primary mb-3">检测模型选择</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="detection_model" class="form-label">选择模型</label>
+                                <select class="form-control" id="detection_model" name="detection_model">
+                                    <option value="default">默认模型 (2/models/crack_detector_optimized/weights/best.pt)</option>
+                                    <option value="custom">自定义模型上传</option>
+                                </select>
+                            </div>
+                            <div id="custom_det_model_container" style="display: none;">
+                                <label class="form-label">上传自定义检测模型 (.pt)</label>
+                                <div class="custom-file-upload">
+                                    <input type="file" class="form-control" id="detection_model_file" name="detection_model_file" accept=".pt">
+                                    <button type="button" id="load_det_model_btn" class="btn btn-success mt-2">加载模型</button>
+                                    <div id="det_model_status" class="mt-2 text-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 单选上传选项 -->
+                    <div class="upload-options mt-4">
+                        <h5 class="text-primary mb-3">上传选项</h5>
+                        
+                        <!-- 上传类型选择器 -->
+                        <div class="process-type mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="upload_type" id="single_upload" value="single" checked onclick="toggleUploadType('single')">
+                                <label class="form-check-label pl-2" for="single_upload">单个文件上传</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="upload_type" id="batch_upload" value="batch" onclick="toggleUploadType('batch')">
+                                <label class="form-check-label pl-2" for="batch_upload">文件夹上传（批量处理）</label>
+                            </div>
+                        </div>
+                        
+                        <!-- 单个文件上传 -->
+                        <div id="single-upload-container" class="form-group mb-4">
+                            <div class="file-upload-wrapper">
+                                <input type="file" class="form-control" id="single-file-input" name="single-file-input" accept="image/*">
+                                <div id="single-file-text" class="file-upload-text">点击或拖拽单个图片文件到此处上传</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 文件夹上传 -->
+                        <div id="batch-upload-container" class="form-group mb-4" style="display: none;">
+                            <div class="file-upload-wrapper">
+                                <input type="file" class="form-control" id="folder-file-input" name="folder-file-input" multiple webkitdirectory directory>
+                                <div id="folder-file-text" class="file-upload-text">点击或拖拽文件夹到此处上传（批量处理）</div>
+                            </div>
+                            
+                            <!-- 文件夹文件列表区域 -->
+                            <div id="folder-selected-files" class="mt-3 mb-6 p-3 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" style="display: none; clear: both;">
+                                <div class="file-list-header d-flex justify-content-between items-center mb-2">
+                                    <p class="mb-0"><strong>已选择的文件:</strong></p>
+                                    <div class="file-actions"></div>
+                                </div>
+                                <div id="folder-file-list-container" class="overflow-auto" style="max-height: 150px; width: 100%; min-width: 0; border-top: 1px solid #eee; padding-top: 10px;">
+                                    <ul id="folder-file-list" class="mt-2 mb-0 list-unstyled"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        // 切换上传类型显示
+                        function toggleUploadType(type) {
+                            const singleContainer = document.getElementById('single-upload-container');
+                            const batchContainer = document.getElementById('batch-upload-container');
+                            const singleInput = document.getElementById('single-file-input');
+                            const folderInput = document.getElementById('folder-file-input');
+                            
+                            if (type === 'single') {
+                                singleContainer.style.display = 'block';
+                                batchContainer.style.display = 'none';
+                                // 清空文件夹上传内容
+                                if (folderInput) {
+                                    folderInput.value = '';
+                                    const folderFileText = document.getElementById('folder-file-text');
+                                    const folderSelectedFiles = document.getElementById('folder-selected-files');
+                                    if (folderFileText) {
+                                        folderFileText.textContent = '点击或拖拽文件夹到此处上传（批量处理）';
+                                        folderFileText.style.color = '#6c757d';
+                                    }
+                                    if (folderSelectedFiles) folderSelectedFiles.style.display = 'none';
+                                }
+                            } else {
+                                singleContainer.style.display = 'none';
+                                batchContainer.style.display = 'block';
+                                // 清空单个文件上传内容
+                                if (singleInput) {
+                                    singleInput.value = '';
+                                    const singleFileText = document.getElementById('single-file-text');
+                                    if (singleFileText) {
+                                        singleFileText.textContent = '点击或拖拽单个图片文件到此处上传';
+                                        singleFileText.style.color = '#6c757d';
+                                    }
+                                }
+                            }
+                        }
+                    </script>
+                    
+                    <!-- 分割参数设置面板 -->
+                    <div id="segmentation-params" class="params-panel bg-white p-4 rounded-lg border shadow-sm mt-4">
+                        <h4 class="text-primary mb-3">分割参数设置</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="seg_threshold" class="form-label">分割阈值 (Threshold)</label>
+                                <input type="range" class="form-control" min="0.01" max="1.0" step="0.01" value="0.3" id="seg_threshold" name="seg_threshold">
+                                <div class="d-flex justify-content-between">
+                                    <span>0.01</span>
+                                    <span id="seg_value">0.3</span>
+                                    <span>1.0</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="rescue_threshold" class="form-label">救援阈值 (Rescue)</label>
+                                <input type="range" class="form-control" min="0.01" max="1.0" step="0.01" value="0.15" id="rescue_threshold" name="rescue_threshold">
+                                <div class="d-flex justify-content-between">
+                                    <span>0.01</span>
+                                    <span id="rescue_value">0.15</span>
+                                    <span>1.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="min_area" class="form-label">最小缺陷面积</label>
+                                <input type="number" class="form-control" min="1" max="1000" value="50" id="min_area" name="min_area">
+                            </div>
+                            <div>
+                                <label for="rescue_min_area" class="form-label">救援模式最小面积</label>
+                                <input type="number" class="form-control" min="1" max="500" value="20" id="rescue_min_area" name="rescue_min_area">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 检测参数设置面板 -->
+                    <div id="detection-params" class="params-panel bg-white p-4 rounded-lg border shadow-sm mt-4" style="display: none;">
+                        <h4 class="text-primary mb-3">检测参数设置</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="conf_threshold" class="form-label">置信度阈值 (Confidence)</label>
+                                <input type="range" class="form-control" min="0.01" max="1.0" step="0.01" value="0.05" id="conf_threshold" name="conf_threshold">
+                                <div class="d-flex justify-content-between">
+                                    <span>0.01</span>
+                                    <span id="conf_value">0.05</span>
+                                    <span>1.0</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="iou_threshold" class="form-label">交并比阈值 (IOU)</label>
+                                <input type="range" class="form-control" min="0.01" max="1.0" step="0.01" value="0.2" id="iou_threshold" name="iou_threshold">
+                                <div class="d-flex justify-content-between">
+                                    <span>0.01</span>
+                                    <span id="iou_value">0.2</span>
+                                    <span>1.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="max_detections" class="form-label">最大检测数量</label>
+                                <input type="number" class="form-control" min="1" max="1000" value="300" id="max_detections" name="max_detections">
+                            </div>
+                            <div>
+                                <label for="img_size" class="form-label">图像尺寸</label>
+                                <select class="form-control" id="img_size" name="img_size">
+                                    <option value="320">320x320 (更快)</option>
+                                    <option value="640" selected>640x640 (平衡)</option>
+                                    <option value="1280">1280x1280 (更精确)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-4">
                         <span>
                             处理图像
                         </span>
@@ -591,6 +1016,144 @@
                 </form>
             </div>
         </div>
+        
+        <script>
+            // 显示滑块当前值
+            document.getElementById('seg_threshold')?.addEventListener('input', function() {
+                document.getElementById('seg_value').textContent = this.value;
+            });
+            document.getElementById('rescue_threshold')?.addEventListener('input', function() {
+                document.getElementById('rescue_value').textContent = this.value;
+            });
+            document.getElementById('conf_threshold')?.addEventListener('input', function() {
+                document.getElementById('conf_value').textContent = this.value;
+            });
+            document.getElementById('iou_threshold')?.addEventListener('input', function() {
+                document.getElementById('iou_value').textContent = this.value;
+            });
+            
+            // 切换参数面板显示
+            function toggleParamsPanel(type) {
+                if (type === 'segmentation') {
+                    document.getElementById('segmentation-params').style.display = 'block';
+                    document.getElementById('detection-params').style.display = 'none';
+                    document.getElementById('segmentation-model-selection').style.display = 'block';
+                    document.getElementById('detection-model-selection').style.display = 'none';
+                } else {
+                    document.getElementById('segmentation-params').style.display = 'none';
+                    document.getElementById('detection-params').style.display = 'block';
+                    document.getElementById('segmentation-model-selection').style.display = 'none';
+                    document.getElementById('detection-model-selection').style.display = 'block';
+                }
+            }
+            
+            // 处理模型选择下拉框变化
+            document.getElementById('segmentation_model')?.addEventListener('change', function() {
+                const container = document.getElementById('custom_seg_model_container');
+                container.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+            
+            document.getElementById('detection_model')?.addEventListener('change', function() {
+                const container = document.getElementById('custom_det_model_container');
+                container.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+            
+            // 处理分割模型上传和加载
+            document.getElementById('load_seg_model_btn')?.addEventListener('click', function() {
+                const fileInput = document.getElementById('segmentation_model_file');
+                const statusDiv = document.getElementById('seg_model_status');
+                
+                if (!statusDiv) return;
+                
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    statusDiv.innerHTML = '<span class="text-danger">请选择一个.h5模型文件</span>';
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                if (!file.name.endsWith('.h5')) {
+                    statusDiv.innerHTML = '<span class="text-danger">分割模型必须是.h5格式</span>';
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<span class="text-warning">正在上传和加载模型，请稍候...</span>';
+                this.disabled = true;
+                
+                const formData = new FormData();
+                formData.append('model_file', file);
+                formData.append('model_type', 'segmentation');
+                
+                fetch('/load_custom_model', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.innerHTML = `<span class="text-success">${data.message}</span>`;
+                        // 显示已加载的模型信息
+                        document.getElementById('segmentation_model').value = 'custom';
+                        document.getElementById('custom_seg_model_container').style.display = 'block';
+                    } else {
+                        statusDiv.innerHTML = `<span class="text-danger">${data.error}</span>`;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<span class="text-danger">上传失败: ${error.message}</span>`;
+                })
+                .finally(() => {
+                    this.disabled = false;
+                });
+            });
+            
+            // 处理检测模型上传和加载
+            document.getElementById('load_det_model_btn')?.addEventListener('click', function() {
+                const fileInput = document.getElementById('detection_model_file');
+                const statusDiv = document.getElementById('det_model_status');
+                
+                if (!statusDiv) return;
+                
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    statusDiv.innerHTML = '<span class="text-danger">请选择一个.pt模型文件</span>';
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                if (!file.name.endsWith('.pt')) {
+                    statusDiv.innerHTML = '<span class="text-danger">检测模型必须是.pt格式</span>';
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<span class="text-warning">正在上传和加载模型，请稍候...</span>';
+                this.disabled = true;
+                
+                const formData = new FormData();
+                formData.append('model_file', file);
+                formData.append('model_type', 'detection');
+                
+                fetch('/load_custom_model', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.innerHTML = `<span class="text-success">${data.message}</span>`;
+                        // 显示已加载的模型信息
+                        document.getElementById('detection_model').value = 'custom';
+                        document.getElementById('custom_det_model_container').style.display = 'block';
+                    } else {
+                        statusDiv.innerHTML = `<span class="text-danger">${data.error}</span>`;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<span class="text-danger">上传失败: ${error.message}</span>`;
+                })
+                .finally(() => {
+                    this.disabled = false;
+                });
+            });
+        </script>
         
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -603,7 +1166,7 @@
         {% endwith %}
         
         <!-- 系统状态提示 -->
-        <div class="alert {% if system_status == 'ready' %}alert-info{% elif system_status == 'processing' %}alert-warning{% elif system_status == 'completed' %}alert-success{% elif system_status == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
+        <div class="alert {% if system_status == 'ready' %}alert-info{% elif system_status == 'processing' or system_status == 'training' %}alert-warning{% elif system_status == 'completed' %}alert-success{% elif system_status == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
             <strong style="font-size: 1.1em;">系统状态：</strong>
             {% if system_status == 'ready' %}
                 <span style="font-weight: bold;">准备就绪</span>
@@ -623,6 +1186,17 @@
                     <span class="status-text" style="color: #f39c12; font-weight: 600;">处理中</span>
                 </span>
                 <span style="margin-left: 10px; font-size: 0.95em; color: #7f8c8d;">请稍候，系统正在分析图像...</span>
+            {% elif system_status == 'training' %}
+                {% if training_type == 'segmentation' %}
+                    <span style="font-weight: bold;">分割模型训练中...</span>
+                {% elif training_type == 'detection' %}
+                    <span style="font-weight: bold;">检测模型训练中...</span>
+                {% endif %}
+                <span class="status-indicator">
+                    <span class="status-dot active"></span>
+                    <span class="status-text" style="color: #f39c12; font-weight: 600;">训练中</span>
+                </span>
+                <span style="margin-left: 10px; font-size: 0.95em; color: #7f8c8d;">请稍候，模型训练可能需要较长时间...</span>
             {% elif system_status == 'completed' %}
                 {% if result_type == 'segmentation' %}
                     <span style="font-weight: bold;">图像分割处理完成</span>
@@ -649,7 +1223,73 @@
                 系统准备就绪，请上传图像并选择处理类型
             {% endif %}
         </div>
-        
+
+        <!-- 训练结果展示 -->
+        {% if training_status == 'completed' %}
+        <div class="result-section">
+            <h2 class="result-title">训练结果</h2>
+            <div class="alert alert-success" role="alert">
+                <strong>训练成功完成！</strong>
+                {% if training_message %}
+                    <p>{{ training_message }}</p>
+                {% endif %}
+                {% if training_type == 'segmentation' %}
+                    <p>分割模型已保存，可以用于图像缺陷检测。</p>
+                {% elif training_type == 'detection' %}
+                    <p>检测模型已保存，可以用于目标检测任务。</p>
+                {% endif %}
+                {% if training_results %}
+                <div class="mt-3">
+                    <h5>训练指标：</h5>
+                    <ul>
+                        {% if training_results.loss is defined %}
+                        <li>最终损失值：{{ training_results.loss }}</li>
+                        {% endif %}
+                        {% if training_results.accuracy is defined %}
+                        <li>准确率：{{ training_results.accuracy }}%</li>
+                        {% endif %}
+                        {% if training_results.miou is defined %}
+                        <li>平均交并比：{{ training_results.miou }}</li>
+                        {% endif %}
+                        {% if training_results.f1_score is defined %}
+                        <li>F1分数：{{ training_results.f1_score }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% if training_plot %}
+            <div class="mt-4">
+                <h5>训练过程可视化：</h5>
+                <div class="image-container">
+                    <img src="{{ training_plot }}" alt="训练过程可视化" loading="lazy">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- AJAX处理结果容器 -->
+        <div id="results-container" class="result-section" style="display: none;">
+            <h2 class="result-title">处理结果</h2>
+            <div class="row">
+                <div id="original-image-container" class="image-container">
+                    <div class="image-caption">原始图像</div>
+                    <!-- 图像将通过JavaScript动态加载 -->
+                </div>
+                <div id="result-image-container" class="image-container">
+                    <div class="image-caption">处理结果</div>
+                    <!-- 图像将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <div class="divider"></div>
+            <!-- AJAX下载按钮区域 -->
+            <div id="ajax-download-container" class="download-container">
+                <!-- 下载按钮将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <!-- 服务器渲染结果容器 -->
         {% if original_image and result_image %}
         <div class="result-section">
             <h2 class="result-title">处理结果</h2>
@@ -681,6 +1321,149 @@
                     <span class="tooltiptext">保存原始和结果图像的对比</span>
                 </a>
             </div>
+        </div>
+
+        <!-- 模型训练面板 -->
+        <div id="training-panel" class="card" style="display: none;">
+            <div class="card-header">
+                模型训练
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/train_model" enctype="multipart/form-data" class="training-form">
+                    <!-- 训练类型选择 -->
+                    <div class="process-type mt-4">
+                        <p>选择训练类型：</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="training_type" id="seg_training" value="segmentation" checked onclick="toggleTrainingParamsPanel('segmentation')">
+                            <label class="form-check-label" for="seg_training">图像分割模型</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="training_type" id="det_training" value="detection" onclick="toggleTrainingParamsPanel('detection')">
+                            <label class="form-check-label" for="det_training">目标检测模型</label>
+                        </div>
+                    </div>
+
+                    <!-- 训练数据上传 -->
+                    <div class="form-group mt-4">
+                        <label for="train_data">上传训练数据集 (ZIP格式，包含images和labels/masks文件夹)</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" class="form-control" id="train_data" name="train_data" required accept=".zip">
+                            <div class="file-upload-text">点击或拖拽ZIP文件到此处上传</div>
+                        </div>
+                    </div>
+
+                    <!-- 分割模型训练参数 -->
+                    <div id="segmentation-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9;">
+                        <h4 class="text-primary mb-3">分割模型训练参数</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="seg_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                <input type="number" class="form-control" min="1" max="1000" value="50" id="seg_epochs" name="seg_epochs">
+                            </div>
+                            <div>
+                                <label for="seg_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                <input type="number" class="form-control" min="1" max="128" value="8" id="seg_batch_size" name="seg_batch_size">
+                            </div>
+                            <div>
+                                <label for="seg_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.001" id="seg_learning_rate" name="seg_learning_rate">
+                            </div>
+                            <div>
+                                <label for="seg_image_size" class="form-label">图像尺寸</label>
+                                <select class="form-control" id="seg_image_size" name="seg_image_size">
+                                    <option value="256">256x256</option>
+                                    <option value="512" selected>512x512</option>
+                                    <option value="1024">1024x1024</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 检测模型训练参数 -->
+                    <div id="detection-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9; display: none;">
+                        <h4 class="text-primary mb-3">检测模型训练参数</h4>
+                        <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label for="det_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                <input type="number" class="form-control" min="1" max="1000" value="100" id="det_epochs" name="det_epochs">
+                            </div>
+                            <div>
+                                <label for="det_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                <input type="number" class="form-control" min="1" max="128" value="4" id="det_batch_size" name="det_batch_size">
+                            </div>
+                            <div>
+                                <label for="det_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.0001" id="det_learning_rate" name="det_learning_rate">
+                            </div>
+                            <div>
+                                <label for="det_img_size" class="form-label">图像尺寸</label>
+                                <select class="form-control" id="det_img_size" name="det_img_size">
+                                    <option value="320">320x320</option>
+                                    <option value="640" selected>640x640</option>
+                                    <option value="1280">1280x1280</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-4">
+                        <span>
+                            开始训练
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 训练结果展示区域 -->
+        {% if training_status == 'completed' %}
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                训练结果
+            </div>
+            <div class="card-body">
+                <h3>{{ training_message }}</h3>
+                
+                <div class="mt-4">
+                    <h4>训练性能指标</h4>
+                    <div class="metrics-container">
+                        <div class="metric-item">
+                            <div class="metric-label">损失值 (Loss)</div>
+                            <div class="metric-value">{{ "%.4f"|format(training_results.loss) }}</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">准确率 (Accuracy)</div>
+                            <div class="metric-value">{{ "%.2f"|format(training_results.accuracy) }}%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">F1分数 (F1-Score)</div>
+                            <div class="metric-value">{{ "%.4f"|format(training_results.f1_score) }}</div>
+                        </div>
+                        {% if training_type == 'segmentation' %}
+                        <div class="metric-item">
+                            <div class="metric-label">平均交并比 (mIoU)</div>
+                            <div class="metric-value">{{ "%.4f"|format(training_results.miou) }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if training_plot %}
+                <div class="mt-6">
+                    <h4>训练过程可视化</h4>
+                    <div class="plot-container">
+                        <img src="{{ training_plot }}" alt="训练曲线图" class="img-fluid rounded">
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-6">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">返回首页</a>
+                    <a href="{{ url_for('index') }}#training-panel" class="btn btn-secondary">再次训练</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
             
             {% if message %}
             <div class="alert {% if success %}alert-success{% elif is_model_not_loaded %}alert-warning{% else %}alert-danger{% endif %}" role="alert">
@@ -711,41 +1494,1428 @@
         {% endif %}
     </div>
 
-    <!-- 添加简单的JS交互 -->
+    <!-- 自定义JavaScript -->
     <script>
-        // 文件上传预览
-        document.querySelector('.file-upload-wrapper input[type="file"]').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const textElement = this.parentNode.querySelector('.file-upload-text');
-                textElement.textContent = `已选择文件: ${file.name}`;
+        // 单个文件上传显示更新
+        function updateSingleFileDisplay() {
+            const fileInput = document.getElementById('single-file-input');
+            const textElement = document.getElementById('single-file-text');
+            
+            if (fileInput.files.length === 0) {
+                textElement.textContent = '点击或拖拽单个图片文件到此处上传';
+                textElement.style.color = '#6c757d';
+            } else {
+                textElement.textContent = `已选择文件: ${fileInput.files[0].name}`;
                 textElement.style.color = '#27ae60';
-                setTimeout(() => {
-                    textElement.style.color = '';
-                }, 2000);
+                // 重置文件夹上传框（避免同时提交两个上传框的内容）
+                const folderInput = document.getElementById('folder-file-input');
+                if (folderInput && folderInput.files.length > 0) {
+                    folderInput.value = '';
+                    const folderFileText = document.getElementById('folder-file-text');
+                    const folderSelectedFiles = document.getElementById('folder-selected-files');
+                    if (folderFileText) {
+                        folderFileText.textContent = '点击或拖拽文件夹到此处上传（批量处理）';
+                        folderFileText.style.color = '#6c757d';
+                    }
+                    if (folderSelectedFiles) folderSelectedFiles.style.display = 'none';
+                }
+            }
+        }
+        
+        // 文件夹上传显示更新
+        function updateFolderFileDisplay() {
+            const fileInput = document.getElementById('folder-file-input');
+            const textElement = document.getElementById('folder-file-text');
+            const selectedFilesContainer = document.getElementById('folder-selected-files');
+            const fileList = document.getElementById('folder-file-list');
+            
+            // 添加null检查以避免错误
+            if (!fileInput || !textElement) return;
+            
+            // 清空列表
+            if (fileList) fileList.innerHTML = '';
+            
+            if (fileInput.files.length === 0) {
+                textElement.textContent = '点击或拖拽文件夹到此处上传（批量处理）';
+                textElement.style.color = '#6c757d';
+                if (selectedFilesContainer) selectedFilesContainer.style.display = 'none';
+            } else {
+                textElement.textContent = `已选择 ${fileInput.files.length} 个文件/文件夹`;
+                textElement.style.color = '#27ae60';
+                selectedFilesContainer.style.display = 'block';
+                
+                // 添加文件到列表，限制最多显示3个文件以避免遮挡
+                const maxDisplayFiles = 3;
+                fileList.innerHTML = '';
+                
+                // 清空文件操作区域
+                const fileActions = selectedFilesContainer.querySelector('.file-actions');
+                fileActions.innerHTML = '';
+                
+                // 只显示前3个文件，其余隐藏
+                for (let i = 0; i < Math.min(fileInput.files.length, maxDisplayFiles); i++) {
+                    const li = document.createElement('li');
+                    li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                    li.style.backgroundColor = '#fafafa';
+                    li.style.borderRadius = '4px';
+                    li.style.overflow = 'hidden';
+                    li.style.whiteSpace = 'nowrap';
+                    li.style.textOverflow = 'ellipsis';
+                    li.style.display = 'block';
+                    // 添加文件图标和文件名，提升视觉效果
+                    li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${fileInput.files[i].name}`;
+                    fileList.appendChild(li);
+                }
+                
+                // 如果文件太多，显示折叠按钮和省略信息
+                if (fileInput.files.length > maxDisplayFiles) {
+                    // 添加省略信息
+                    const li = document.createElement('li');
+                    li.className = 'text-muted py-1 px-2';
+                    li.innerHTML = `<em>... 还有 ${fileInput.files.length - maxDisplayFiles} 个文件未显示</em>`;
+                    fileList.appendChild(li);
+                    
+                    // 添加折叠按钮到文件操作区域
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.className = 'btn btn-sm btn-secondary';
+                    toggleBtn.textContent = '显示全部文件';
+                    toggleBtn.style.minWidth = '120px';
+                    toggleBtn.setAttribute('data-expanded', 'false');
+                    toggleBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
+                        
+                        fileList.innerHTML = '';
+                        
+                        if (isExpanded) {
+                            // 收起 - 只显示前3个
+                            for (let i = 0; i < maxDisplayFiles; i++) {
+                                const li = document.createElement('li');
+                                li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                                li.style.backgroundColor = '#fafafa';
+                                li.style.borderRadius = '4px';
+                                li.style.overflow = 'hidden';
+                                li.style.whiteSpace = 'nowrap';
+                                li.style.textOverflow = 'ellipsis';
+                                li.style.display = 'block';
+                                li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${fileInput.files[i].name}`;
+                                fileList.appendChild(li);
+                            }
+                            
+                            // 添加省略信息
+                            const ellipsisLi = document.createElement('li');
+                            ellipsisLi.className = 'text-muted py-1 px-2';
+                            ellipsisLi.innerHTML = `<em>... 还有 ${fileInput.files.length - maxDisplayFiles} 个文件未显示</em>`;
+                            fileList.appendChild(ellipsisLi);
+                            
+                            toggleBtn.textContent = '显示全部文件';
+                            toggleBtn.setAttribute('data-expanded', 'false');
+                            toggleBtn.className = 'btn btn-sm btn-secondary';
+                        } else {
+                            // 展开 - 显示全部
+                            for (let i = 0; i < fileInput.files.length; i++) {
+                                const li = document.createElement('li');
+                                li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                                li.style.backgroundColor = '#fafafa';
+                                li.style.borderRadius = '4px';
+                                li.style.overflow = 'hidden';
+                                li.style.whiteSpace = 'nowrap';
+                                li.style.textOverflow = 'ellipsis';
+                                li.style.display = 'block';
+                                li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${fileInput.files[i].name}`;
+                                fileList.appendChild(li);
+                            }
+                            
+                            toggleBtn.textContent = '收起文件列表';
+                            toggleBtn.setAttribute('data-expanded', 'true');
+                            toggleBtn.className = 'btn btn-sm btn-primary';
+                        }
+                    };
+                    fileActions.appendChild(toggleBtn);
+                }
+                
+                // 重置单个文件上传框（避免同时提交两个上传框的内容）
+                const singleInput = document.getElementById('single-file-input');
+                if (singleInput && singleInput.files.length > 0) {
+                    singleInput.value = '';
+                    const singleFileText = document.getElementById('single-file-text');
+                    if (singleFileText) {
+                        singleFileText.textContent = '点击或拖拽单个图片文件到此处上传';
+                        singleFileText.style.color = '#6c757d';
+                    }
+                }
+            }
+        }
+
+        // 更新文件名显示
+        function updateFileDisplay() {
+            const fileInput = document.getElementById('file');
+            const selectedFilesContainer = document.getElementById('selected-files');
+            const fileList = document.getElementById('file-list');
+            
+            // 添加null检查以避免错误
+            if (!fileInput || !fileInput.files) return;
+            
+            const files = fileInput.files;
+            const textElement = fileInput.parentNode?.querySelector('.file-upload-text');
+            
+            // 清空列表
+            if (fileList) fileList.innerHTML = '';
+            
+            if (files.length === 0) {
+                // 无文件选择状态
+                if (textElement) {
+                    textElement.textContent = '点击或拖拽文件/文件夹到此处上传';
+                    textElement.style.color = '#6c757d';
+                }
+                if (selectedFilesContainer) selectedFilesContainer.style.display = 'none';
+                return;
+            }
+            
+            if (files.length === 1 && textElement) {
+                // 单个文件选择状态 - 优化显示，只在主区域显示文件名
+                textElement.textContent = `已选择文件: ${files[0].name}`;
+                textElement.style.color = '#27ae60';
+                if (selectedFilesContainer) selectedFilesContainer.style.display = 'none';
+            } else if (textElement) {
+                // 多个文件选择状态 - 只在上传区域显示文件数量
+                textElement.textContent = `已选择 ${files.length} 个文件/文件夹`;
+                textElement.style.color = '#27ae60';
+                if (selectedFilesContainer) selectedFilesContainer.style.display = 'block';
+                
+                    // 添加文件到列表，限制最多显示3个文件以避免遮挡
+                const maxDisplayFiles = 3;
+                fileList.innerHTML = '';
+                
+                // 清空文件操作区域
+                const fileActions = selectedFilesContainer.querySelector('.file-actions');
+                fileActions.innerHTML = '';
+                
+                // 只显示前3个文件，其余隐藏
+                for (let i = 0; i < Math.min(files.length, maxDisplayFiles); i++) {
+                    const li = document.createElement('li');
+                    li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                    li.style.backgroundColor = '#fafafa';
+                    li.style.borderRadius = '4px';
+                    li.style.overflow = 'hidden';
+                    li.style.whiteSpace = 'nowrap';
+                    li.style.textOverflow = 'ellipsis';
+                    li.style.display = 'block';
+                    // 添加文件图标和文件名，提升视觉效果
+                    li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${files[i].name}`;
+                    fileList.appendChild(li);
+                }
+                
+                // 如果文件太多，显示折叠按钮和省略信息
+                if (files.length > maxDisplayFiles) {
+                    // 添加省略信息
+                    const li = document.createElement('li');
+                    li.className = 'text-muted py-1 px-2';
+                    li.innerHTML = `<em>... 还有 ${files.length - maxDisplayFiles} 个文件未显示</em>`;
+                    fileList.appendChild(li);
+                    
+                    // 添加折叠按钮到文件操作区域
+                        const toggleBtn = document.createElement('button');
+                        toggleBtn.className = 'btn btn-sm btn-secondary';
+                        toggleBtn.textContent = '显示全部文件';
+                        toggleBtn.style.minWidth = '120px';
+                        toggleBtn.setAttribute('data-expanded', 'false');
+                    toggleBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
+                        
+                        fileList.innerHTML = '';
+                        
+                        if (isExpanded) {
+                            // 收起 - 只显示前3个
+                            for (let i = 0; i < maxDisplayFiles; i++) {
+                                const li = document.createElement('li');
+                                li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                                li.style.backgroundColor = '#fafafa';
+                                li.style.borderRadius = '4px';
+                                li.style.overflow = 'hidden';
+                                li.style.whiteSpace = 'nowrap';
+                                li.style.textOverflow = 'ellipsis';
+                                li.style.display = 'block';
+                                li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${files[i].name}`;
+                                fileList.appendChild(li);
+                            }
+                            
+                            // 添加省略信息
+                            const ellipsisLi = document.createElement('li');
+                            ellipsisLi.className = 'text-muted py-1 px-2';
+                            ellipsisLi.innerHTML = `<em>... 还有 ${files.length - maxDisplayFiles} 个文件未显示</em>`;
+                            fileList.appendChild(ellipsisLi);
+                            
+                            toggleBtn.textContent = '显示全部文件';
+                            toggleBtn.setAttribute('data-expanded', 'false');
+                            toggleBtn.className = 'btn btn-sm btn-secondary';
+                        } else {
+                            // 展开 - 显示全部
+                            for (let i = 0; i < files.length; i++) {
+                                const li = document.createElement('li');
+                                li.className = 'py-2 px-3 rounded hover:bg-gray-50 transition-colors mb-1 d-block';
+                                li.style.backgroundColor = '#fafafa';
+                                li.style.borderRadius = '4px';
+                                li.style.overflow = 'hidden';
+                                li.style.whiteSpace = 'nowrap';
+                                li.style.textOverflow = 'ellipsis';
+                                li.style.display = 'block';
+                                li.innerHTML = `<i class="fas fa-file-image mr-2"></i>${files[i].name}`;
+                                fileList.appendChild(li);
+                            }
+                            
+                            toggleBtn.textContent = '收起文件列表';
+                            toggleBtn.setAttribute('data-expanded', 'true');
+                            toggleBtn.className = 'btn btn-sm btn-primary';
+                        }
+                    };
+                    fileActions.appendChild(toggleBtn);
+                }
+            }
+            
+            // 短暂高亮后恢复默认颜色
+            textElement.style.color = '#27ae60';
+            setTimeout(() => {
+                textElement.style.color = '';
+            }, 2000);
+        }
+
+        // 添加事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 只在主页面（index）上初始化标签页和上传相关功能
+            if (window.location.pathname === '/') {
+                // 上传框事件监听器
+                try {
+                    // 单个文件上传事件
+                    document.getElementById('single-file-input').addEventListener('change', updateSingleFileDisplay);
+                    
+                    // 文件夹上传事件
+                    document.getElementById('folder-file-input').addEventListener('change', updateFolderFileDisplay);
+                    
+                    // 标签页切换事件在页面底部统一处理
+                    
+                    // 检查训练面板是否存在，如果不存在则动态创建
+                    setTimeout(function() {
+                        let trainingPanel = document.getElementById('training-panel');
+                        if (!trainingPanel) {
+                            console.log('初始化训练面板组件...');
+                            // 动态创建训练面板
+                            trainingPanel = document.createElement('div');
+                            trainingPanel.id = 'training-panel';
+                            trainingPanel.className = 'card';
+                            trainingPanel.style.display = 'none';
+                            
+                            // 设置训练面板内容
+                            trainingPanel.innerHTML = `
+                                <div class="card-header">
+                                    模型训练
+                                </div>
+                                <div class="card-body">
+                                    <!-- 训练结果显示区域 -->
+                                    <div id="training-results" class="alert alert-success mt-4" role="alert" style="display: none;">
+                                        <h2 class="result-title">训练结果</h2>
+                                        <strong id="training-status-message">训练成功完成！</strong>
+                                        <p id="training-message"></p>
+                                        <p id="training-type-info"></p>
+                                        <div class="mt-3" id="training-metrics" style="display: none;">
+                                            <h5>训练指标：</h5>
+                                            <ul id="metrics-list"></ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <form method="POST" action="/train_model" enctype="multipart/form-data" class="training-form">
+                                        <!-- 训练类型选择 -->
+                                        <div class="process-type mt-4">
+                                            <p>选择训练类型：</p>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="training_type" id="seg_training" value="segmentation" checked onclick="toggleTrainingParamsPanel('segmentation')">
+                                                <label class="form-check-label" for="seg_training">图像分割模型</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="training_type" id="det_training" value="detection" onclick="toggleTrainingParamsPanel('detection')">
+                                                <label class="form-check-label" for="det_training">目标检测模型</label>
+                                            </div>
+                                        </div>
+
+                                        <!-- 训练数据上传 -->
+                                        <div class="form-group mt-4">
+                                            <label for="train_data">上传训练数据集 (ZIP格式，包含images和labels/masks文件夹)</label>
+                                            <div class="file-upload-wrapper">
+                                                <input type="file" class="form-control" id="train_data" name="train_data" required accept=".zip">
+                                                <div class="file-upload-text">点击或拖拽ZIP文件到此处上传</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 分割模型训练参数 -->
+                                        <div id="segmentation-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9;">
+                                            <h4 class="text-primary mb-3">分割模型训练参数</h4>
+                                            <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                                <div>
+                                                    <label for="seg_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                                    <input type="number" class="form-control" min="1" max="1000" value="50" id="seg_epochs" name="seg_epochs">
+                                                </div>
+                                                <div>
+                                                    <label for="seg_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                                    <input type="number" class="form-control" min="1" max="128" value="8" id="seg_batch_size" name="seg_batch_size">
+                                                </div>
+                                                <div>
+                                                    <label for="seg_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                                    <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.001" id="seg_learning_rate" name="seg_learning_rate">
+                                                </div>
+                                                <div>
+                                                    <label for="seg_image_size" class="form-label">图像尺寸</label>
+                                                    <select class="form-control" id="seg_image_size" name="seg_image_size">
+                                                        <option value="256">256x256</option>
+                                                        <option value="512" selected>512x512</option>
+                                                        <option value="1024">1024x1024</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 检测模型训练参数 -->
+                                        <div id="detection-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9; display: none;">
+                                            <h4 class="text-primary mb-3">检测模型训练参数</h4>
+                                            <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                                <div>
+                                                    <label for="det_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                                    <input type="number" class="form-control" min="1" max="1000" value="100" id="det_epochs" name="det_epochs">
+                                                </div>
+                                                <div>
+                                                    <label for="det_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                                    <input type="number" class="form-control" min="1" max="128" value="4" id="det_batch_size" name="det_batch_size">
+                                                </div>
+                                                <div>
+                                                    <label for="det_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                                    <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.0001" id="det_learning_rate" name="det_learning_rate">
+                                                </div>
+                                                <div>
+                                                    <label for="det_img_size" class="form-label">图像尺寸</label>
+                                                    <select class="form-control" id="det_img_size" name="det_img_size">
+                                                        <option value="320">320x320</option>
+                                                        <option value="640" selected>640x640</option>
+                                                        <option value="1280">1280x1280</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary mt-4">
+                                            <span>
+                                                开始训练
+                                            </span>
+                                        </button>
+                                    </form>
+                                </div>
+                            `;
+                            
+                            // 将训练面板添加到适当位置（假设与检测面板同级）
+                            const detectionPanel = document.getElementById('detection-panel');
+                            if (detectionPanel && detectionPanel.parentNode) {
+                                detectionPanel.parentNode.appendChild(trainingPanel);
+                                console.log('训练面板已动态创建并添加到DOM中');
+                            } else {
+                                console.error('无法找到合适位置添加训练面板');
+                            }
+                        } else {
+                            console.log('训练面板存在:', trainingPanel);
+                        }
+                        
+                        // 默认显示检测面板 - 只在必要元素都存在时执行
+                        if (document.getElementById('detection-panel') && 
+                            document.getElementById('detection-tab') && 
+                            document.getElementById('training-tab')) {
+                            switchTab('detection');
+                        }
+                    }, 100); // 短暂延迟确保DOM完全加载
+                } catch (error) {
+                    console.debug('初始化UI组件时发生错误，页面可能缺少必要元素', error);
+                }
+            }
+            
+            // 表单提交处理 - 只在主页面上执行
+            if (window.location.pathname === '/') {
+                try {
+                    const uploadForm = document.querySelector('.upload-form');
+                    if (uploadForm) {
+                        uploadForm.addEventListener('submit', function(e) {
+                            // 阻止默认提交行为，使用AJAX处理
+                            e.preventDefault();
+                            
+                            const form = e.target;
+                            const formData = new FormData(form);
+                            // 获取上传类型选择
+                            const singleUpload = document.getElementById('single_upload');
+                            const batchUpload = document.getElementById('batch_upload');
+                            const isBatchUpload = batchUpload && batchUpload.checked;
+                            
+                            // 获取相应的文件输入元素
+                            const singleFileInput = document.getElementById('single-file-input');
+                            const folderFileInput = document.getElementById('folder-file-input');
+                            
+                            // 表单验证
+                            let hasFiles = false;
+                            let files = [];
+                            
+                            if (isBatchUpload) {
+                                hasFiles = folderFileInput && folderFileInput.files && folderFileInput.files.length > 0;
+                                if (hasFiles) files = folderFileInput.files;
+                            } else {
+                                hasFiles = singleFileInput && singleFileInput.files && singleFileInput.files.length > 0;
+                                if (hasFiles) files = singleFileInput.files;
+                            }
+                            
+                            if (!hasFiles) {
+                                alert('请选择至少一个文件');
+                                return;
+                            }
+                            
+                            // 如果是批量上传且文件数量较多，显示提示
+                            if (isBatchUpload && files.length > 20) {
+                                if (!confirm(`您选择了 ${files.length} 个文件，批量处理可能需要较长时间。确定要继续吗？`)) {
+                                    return;
+                                }
+                            }
+                            
+                            // 显示加载状态
+                            const submitBtn = this.querySelector('button[type="submit"]');
+                            if (submitBtn) {
+                                submitBtn.innerHTML = '<span><div class="loading"></div>处理中...</span>';
+                                submitBtn.disabled = true;
+                                submitBtn.style.opacity = '0.8';
+                            }
+                            
+                            // 发送AJAX请求
+                            fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                signal: AbortSignal.timeout(300000) // 5分钟超时
+                            })
+                            .then(response => {
+                                // 恢复按钮状态
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<span>处理文件</span>';
+                                }
+                                
+                                // 检查响应类型
+                                const contentType = response.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    return response.json();
+                                } else {
+                                    // 如果不是JSON，可能是批量结果页面的HTML
+                                    return response.text().then(html => {
+                                        // 对于批量处理，我们需要跳转到结果页面
+                                        // 或者在当前页面显示结果（根据需求选择）
+                                        if (isBatchUpload) {
+                                            // 为批量处理，创建一个新页面来显示结果
+                                            document.body.innerHTML = html;
+                                        } else {
+                                            throw new Error('预期JSON响应但收到HTML');
+                                        }
+                                    });
+                                }
+                            })
+                            .then(data => {
+                                // 处理JSON响应（单个文件处理）
+                                if (data && typeof data === 'object') {
+                                    if (data.success) {
+                                        // 显示成功消息
+                                        showMessage(data.message || '处理成功');
+                                        
+                                        // 如果有处理结果，更新UI显示
+                                        if (data.original_image && data.result_image) {
+                                            const resultsContainer = document.getElementById('results-container');
+                                            if (resultsContainer) {
+                                                // 更新结果容器内容
+                                                const originalImageHtml = `<img src="${data.original_image}" alt="原始图像" class="img-fluid">`;
+                                                const resultImageHtml = `<img src="${data.result_image}" alt="处理结果" class="img-fluid">`;
+                                                 
+                                                const originalContainer = document.getElementById('original-image-container');
+                                                const resultContainer = document.getElementById('result-image-container');
+                                                const downloadContainer = document.getElementById('ajax-download-container');
+                                                 
+                                                if (originalContainer) originalContainer.innerHTML = originalImageHtml;
+                                                if (resultContainer) resultContainer.innerHTML = resultImageHtml;
+                                                 
+                                                // 生成下载按钮
+                                                if (downloadContainer) {
+                                                    // 提取文件名用于下载链接
+                                                    const resultFilename = data.result_image.split('/').pop();
+                                                    const originalFilename = data.original_image.split('/').pop();
+                                                    const resultFolder = data.result_image.includes('detection_results') ? 'detection_results' : 'segmentation_results';
+                                                     
+                                                    // 创建下载按钮HTML
+                                                    const downloadButtonsHtml = `
+                                                        <a href="/download/result/${resultFilename}" class="btn btn-primary tooltip">
+                                                            <span>下载结果图片</span>
+                                                            <span class="tooltiptext">保存处理后的图像</span>
+                                                        </a>
+                                                        <a href="/download/comparison?upload_folder=uploads&upload_filename=${originalFilename}&result_folder=${resultFolder}&result_filename=${resultFilename}" class="btn btn-success tooltip">
+                                                            <span>下载对比图片 (并排)</span>
+                                                            <span class="tooltiptext">保存原始和结果图像的对比</span>
+                                                        </a>
+                                                    `;
+                                                     
+                                                    downloadContainer.innerHTML = downloadButtonsHtml;
+                                                }
+                                                 
+                                                resultsContainer.style.display = 'block';
+                                            }
+                                        }
+                                    } else {
+                                        // 显示错误消息
+                                        showMessage(data.message || '处理失败', 'error');
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('上传处理错误:', error);
+                                // 恢复按钮状态
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<span>处理文件</span>';
+                                }
+                                // 只有当不是批量处理时才显示错误消息
+                                if (!isBatchUpload) {
+                                    showMessage('处理过程中发生错误: ' + error.message, 'error');
+                                }
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.debug('设置表单提交处理时发生错误', error);
+                }
+            }
+            
+            // 消息显示辅助函数
+            function showMessage(message, type = 'success') {
+                // 清除旧的消息
+                const oldMessages = document.querySelectorAll('.result-alert');
+                oldMessages.forEach(alert => alert.remove());
+                
+                // 创建新的消息元素
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} result-alert mt-4`;
+                alertDiv.role = 'alert';
+                alertDiv.textContent = message;
+                
+                // 添加到页面中
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.prepend(alertDiv);
+                }
+                
+                // 3秒后自动关闭（成功消息）
+                if (type === 'success') {
+                    setTimeout(() => {
+                        alertDiv.style.opacity = '0';
+                        alertDiv.style.transition = 'opacity 0.5s';
+                        setTimeout(() => alertDiv.remove(), 500);
+                    }, 3000);
+                }
+            }
+            
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ 
+                            behavior: 'smooth' 
+                        });
+                    }
+                });
+            });
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            console.log('switchTab函数被调用，参数tabName:', tabName);
+            // 获取所有需要操作的元素
+            let detectionPanel = document.getElementById('detection-panel');
+            let trainingPanel = document.getElementById('training-panel');
+            const detectionTab = document.getElementById('detection-tab');
+            const trainingTab = document.getElementById('training-tab');
+            const systemStatusAlert = document.querySelector('.alert[role="alert"]');
+            console.log('DOM元素获取结果:', { detectionPanel, trainingPanel, detectionTab, trainingTab });
+            
+            // 当切换到训练标签页时，清除检测结果显示
+            if (tabName === 'training') {
+                console.log('切换到训练标签页，清除检测结果');
+                const resultsContainer = document.getElementById('results-container');
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '';
+                    resultsContainer.style.display = 'none';
+                }
+                const originalImageContainer = document.getElementById('original-image-container');
+                if (originalImageContainer) {
+                    originalImageContainer.innerHTML = '';
+                }
+                const resultImageContainer = document.getElementById('result-image-container');
+                if (resultImageContainer) {
+                    resultImageContainer.innerHTML = '';
+                }
+                // 清除任何可能存在的结果警告或提示
+                const resultAlerts = document.querySelectorAll('.result-alert');
+                resultAlerts.forEach(alert => alert.remove());
+            }
+            
+            // 检查关键按钮元素是否存在
+            if (!detectionTab || !trainingTab) {
+                // 只在开发环境打印警告，避免在不包含标签页的页面（如batch_results.html）显示错误
+                if (window.location.pathname === '/') {
+                    console.warn('标签页切换失败：未找到按钮DOM元素');
+                }
+                return;
+            }
+            
+            // 特殊处理：如果切换到训练标签页但训练面板不存在，立即尝试创建
+            if (tabName === 'training' && !trainingPanel) {
+                console.log('准备训练面板...');
+                
+                // 动态创建训练面板
+                trainingPanel = document.createElement('div');
+                trainingPanel.id = 'training-panel';
+                trainingPanel.className = 'card';
+                trainingPanel.style.display = 'block'; // 直接显示新创建的面板
+                
+                // 设置训练面板内容
+                trainingPanel.innerHTML = `
+                    <div class="card-header">
+                        模型训练
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/train_model" enctype="multipart/form-data" class="training-form">
+                            <!-- 训练类型选择 -->
+                            <div class="process-type mt-4">
+                                <p>选择训练类型：</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="training_type" id="seg_training" value="segmentation" checked onclick="toggleTrainingParamsPanel('segmentation')">
+                                    <label class="form-check-label" for="seg_training">图像分割模型</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="training_type" id="det_training" value="detection" onclick="toggleTrainingParamsPanel('detection')">
+                                    <label class="form-check-label" for="det_training">目标检测模型</label>
+                                </div>
+                            </div>
+
+                            <!-- 训练数据上传 -->
+                            <div class="form-group mt-4">
+                                <label for="train_data">上传训练数据集 (ZIP格式，包含images和labels/masks文件夹)</label>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" class="form-control" id="train_data" name="train_data" required accept=".zip">
+                                    <div class="file-upload-text">点击或拖拽ZIP文件到此处上传</div>
+                                </div>
+                            </div>
+
+                            <!-- 分割模型训练参数 -->
+                            <div id="segmentation-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9;">
+                                <h4 class="text-primary mb-3">分割模型训练参数</h4>
+                                <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                    <div>
+                                        <label for="seg_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                        <input type="number" class="form-control" min="1" max="1000" value="50" id="seg_epochs" name="seg_epochs">
+                                    </div>
+                                    <div>
+                                        <label for="seg_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                        <input type="number" class="form-control" min="1" max="128" value="8" id="seg_batch_size" name="seg_batch_size">
+                                    </div>
+                                    <div>
+                                        <label for="seg_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                        <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.001" id="seg_learning_rate" name="seg_learning_rate">
+                                    </div>
+                                    <div>
+                                        <label for="seg_image_size" class="form-label">图像尺寸</label>
+                                        <select class="form-control" id="seg_image_size" name="seg_image_size">
+                                            <option value="256">256x256</option>
+                                            <option value="512" selected>512x512</option>
+                                            <option value="1024">1024x1024</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 检测模型训练参数 -->
+                            <div id="detection-training-params" class="params-panel bg-white p-4 rounded-lg border mt-4" style="border-color: #e1e5e9; display: none;">
+                                <h4 class="text-primary mb-3">检测模型训练参数</h4>
+                                <div class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                    <div>
+                                        <label for="det_epochs" class="form-label">训练轮次 (Epochs)</label>
+                                        <input type="number" class="form-control" min="1" max="1000" value="100" id="det_epochs" name="det_epochs">
+                                    </div>
+                                    <div>
+                                        <label for="det_batch_size" class="form-label">批次大小 (Batch Size)</label>
+                                        <input type="number" class="form-control" min="1" max="128" value="4" id="det_batch_size" name="det_batch_size">
+                                    </div>
+                                    <div>
+                                        <label for="det_learning_rate" class="form-label">学习率 (Learning Rate)</label>
+                                        <input type="number" class="form-control" min="0.00001" max="0.1" step="0.00001" value="0.0001" id="det_learning_rate" name="det_learning_rate">
+                                    </div>
+                                    <div>
+                                        <label for="det_img_size" class="form-label">图像尺寸</label>
+                                        <select class="form-control" id="det_img_size" name="det_img_size">
+                                            <option value="320">320x320</option>
+                                            <option value="640" selected>640x640</option>
+                                            <option value="1280">1280x1280</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mt-4">
+                                <span>
+                                    开始训练
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                `;
+                
+                // 将训练面板添加到适当位置
+                if (detectionPanel && detectionPanel.parentNode) {
+                    detectionPanel.parentNode.appendChild(trainingPanel);
+                    console.log('训练面板已动态创建并添加到DOM中');
+                } else {
+                    // 如果找不到检测面板，尝试添加到body或其他合适位置
+                    document.body.appendChild(trainingPanel);
+                    console.log('训练面板已添加到body中');
+                }
+            }
+            
+            // 执行标签页切换逻辑
+            if (tabName === 'detection') {
+                console.log('切换到检测标签页');
+                // 切换面板显示状态（如果存在）
+                if (detectionPanel) detectionPanel.style.display = 'block';
+                if (trainingPanel) trainingPanel.style.display = 'none';
+                // 切换按钮样式（始终执行）
+                detectionTab.classList.remove('btn-outline-primary');
+                detectionTab.classList.add('btn-primary');
+                trainingTab.classList.remove('btn-primary');
+                trainingTab.classList.add('btn-outline-primary');
+                // 显示系统状态
+                if (systemStatusAlert) systemStatusAlert.style.display = 'block';
+            } else {
+                console.log('切换到训练标签页');
+                // 切换面板显示状态（如果存在）
+                if (detectionPanel) detectionPanel.style.display = 'none';
+                if (trainingPanel) trainingPanel.style.display = 'block';
+                // 切换按钮样式（始终执行）
+                detectionTab.classList.remove('btn-primary');
+                detectionTab.classList.add('btn-outline-primary');
+                trainingTab.classList.remove('btn-outline-primary');
+                trainingTab.classList.add('btn-primary');
+                // 隐藏系统状态
+                if (systemStatusAlert) systemStatusAlert.style.display = 'none';
+            }
+            
+            // 重新获取训练面板引用，确保获取到最新创建的面板
+            trainingPanel = document.getElementById('training-panel');
+            console.log('标签页切换完成，当前状态:', {
+                detectionPanelVisible: detectionPanel ? detectionPanel.style.display : 'not found',
+                trainingPanelVisible: trainingPanel ? trainingPanel.style.display : 'not found',
+                detectionTabClasses: detectionTab.className,
+                trainingTabClasses: trainingTab.className
+            });
+        }
+
+        // 切换训练参数面板
+        function toggleTrainingParamsPanel(type) {
+            // 获取所有需要操作的元素
+            const segmentationParams = document.getElementById('segmentation-training-params');
+            const detectionParams = document.getElementById('detection-training-params');
+            
+            // 检查所有元素是否都存在
+            if (!segmentationParams || !detectionParams) {
+                console.warn('训练参数面板切换失败：未找到必要的DOM元素');
+                return;
+            }
+            
+            // 执行参数面板切换逻辑
+            if (type === 'segmentation') {
+                segmentationParams.style.display = 'block';
+                detectionParams.style.display = 'none';
+            } else {
+                segmentationParams.style.display = 'none';
+                detectionParams.style.display = 'block';
+            }
+        }
+
+        // 添加训练结果显示区域（如果不存在）
+        function ensureResultsContainerExists() {
+            let resultsContainer = document.getElementById('training-results');
+            if (!resultsContainer) {
+                const trainingForm = document.querySelector('.training-form');
+                if (trainingForm) {
+                    resultsContainer = document.createElement('div');
+                    resultsContainer.id = 'training-results';
+                    resultsContainer.className = 'alert alert-success mt-4';
+                    resultsContainer.role = 'alert';
+                    resultsContainer.style.display = 'none';
+                    resultsContainer.innerHTML = `
+                        <h2 class="result-title">训练结果</h2>
+                        <strong id="training-status-message">训练成功完成！</strong>
+                        <p id="training-message"></p>
+                        <p id="training-type-info"></p>
+                        <div class="mt-3" id="training-metrics" style="display: none;">
+                            <h5>训练指标：</h5>
+                            <ul id="metrics-list"></ul>
+                        </div>
+                    `;
+                    trainingForm.parentNode.insertBefore(resultsContainer, trainingForm);
+                }
+            }
+            return resultsContainer;
+        }
+        
+        // 处理模型训练表单的异步提交
+        function handleTrainingFormSubmit(event) {
+            console.log('handleTrainingFormSubmit函数被调用');
+            event.preventDefault(); // 阻止表单默认提交（避免页面刷新）
+            
+            // 优先使用this上下文（当通过call/apply调用时），否则使用event.target或通过选择器获取
+            const form = (this instanceof HTMLFormElement) ? this : 
+                        (event.target instanceof HTMLFormElement) ? event.target : 
+                        document.getElementById('training-form');
+            
+            // 确保form是HTMLFormElement类型
+            if (!(form instanceof HTMLFormElement)) {
+                console.error('无法获取有效的表单元素');
+                alert('系统错误：无法获取训练表单');
+                return;
+            }
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton ? submitButton.innerHTML : '';
+            
+            // 检查按钮是否存在
+            if (!submitButton) {
+                console.error('未找到提交按钮');
+                alert('系统错误：未找到提交按钮');
+                return;
+            }
+            
+            // 显示加载状态
+            submitButton.disabled = true;
+            submitButton.innerHTML = '训练中... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            
+            // 确保结果容器存在并隐藏
+            const resultsContainer = ensureResultsContainerExists();
+            if (!resultsContainer) {
+                console.error('未找到结果容器');
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+                alert('系统错误：未找到结果显示容器');
+                return;
+            }
+            resultsContainer.style.display = 'none';
+            
+            // 打印表单数据，用于调试
+            console.log('表单数据:', formData.get('training_type'));
+            console.log('训练数据集文件:', formData.get('train_data'));
+            
+            // 发送AJAX请求
+            console.log('开始发送训练请求到/train_model');
+            fetch('/train_model', {
+                method: 'POST',
+                body: formData,
+                // 增加超时设置
+                signal: AbortSignal.timeout(3600000) // 1小时超时
+            })
+            .then(response => {
+                console.log('收到训练请求响应:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`服务器响应错误: ${response.status} ${response.statusText}`);
+                }
+                try {
+                    return response.json();
+                } catch (jsonError) {
+                    console.error('解析JSON响应失败:', jsonError);
+                    throw new Error('服务器返回的响应格式错误');
+                }
+            })
+            .then(data => {
+                console.log('训练响应数据:', data);
+                // 恢复按钮状态
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+                
+                // 显示结果
+                resultsContainer.style.display = 'block';
+                
+                if (data.status === 'success') {
+                    resultsContainer.className = 'alert alert-success mt-4';
+                    document.getElementById('training-status-message').textContent = '训练成功完成！';
+                    document.getElementById('training-message').textContent = data.training_message || '';
+                    
+                    // 设置训练类型信息
+                    const typeInfo = document.getElementById('training-type-info');
+                    if (data.training_type === 'segmentation') {
+                        typeInfo.textContent = '分割模型已保存，可以用于图像缺陷检测。';
+                    } else if (data.training_type === 'detection') {
+                        typeInfo.textContent = '检测模型已保存，可以用于目标检测任务。';
+                    }
+                    
+                    // 显示训练指标
+                    const metricsDiv = document.getElementById('training-metrics');
+                    const metricsList = document.getElementById('metrics-list');
+                    metricsList.innerHTML = '';
+                    
+                    if (data.training_results) {
+                        metricsDiv.style.display = 'block';
+                        const results = data.training_results;
+                        
+                        if (results.loss !== undefined) {
+                            const lossLi = document.createElement('li');
+                            lossLi.textContent = `最终损失值：${results.loss}`;
+                            metricsList.appendChild(lossLi);
+                        }
+                        if (results.accuracy !== undefined) {
+                            const accLi = document.createElement('li');
+                            accLi.textContent = `准确率：${results.accuracy}%`;
+                            metricsList.appendChild(accLi);
+                        }
+                        if (results.miou !== undefined) {
+                            const miouLi = document.createElement('li');
+                            miouLi.textContent = `平均交并比：${results.miou}`;
+                            metricsList.appendChild(miouLi);
+                        }
+                        if (results.f1_score !== undefined) {
+                            const f1Li = document.createElement('li');
+                            f1Li.textContent = `F1分数：${results.f1_score}`;
+                            metricsList.appendChild(f1Li);
+                        }
+                    }
+                } else {
+                    resultsContainer.className = 'alert alert-danger mt-4';
+                    document.getElementById('training-status-message').textContent = '训练失败';
+                    document.getElementById('training-message').textContent = data.message || '未知错误';
+                    document.getElementById('training-type-info').textContent = '';
+                    document.getElementById('training-metrics').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('训练请求错误:', error);
+                
+                // 恢复按钮状态 - 确保即使出错也能恢复UI
+                try {
+                    if (submitButton && submitButton instanceof HTMLElement) {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                    }
+                } catch (uiError) {
+                    console.error('恢复UI状态失败:', uiError);
+                }
+                
+                // 显示错误信息
+                try {
+                    if (resultsContainer && resultsContainer instanceof HTMLElement) {
+                        resultsContainer.style.display = 'block';
+                        resultsContainer.className = 'alert alert-danger mt-4';
+                        
+                        // 安全地访问DOM元素
+                        const statusMsg = document.getElementById('training-status-message');
+                        const message = document.getElementById('training-message');
+                        const typeInfo = document.getElementById('training-type-info');
+                        const metricsDiv = document.getElementById('training-metrics');
+                        
+                        if (statusMsg) statusMsg.textContent = '请求错误';
+                        if (message) message.textContent = error.message || '网络请求失败，请重试';
+                        if (typeInfo) typeInfo.textContent = '';
+                        if (metricsDiv) metricsDiv.style.display = 'none';
+                    }
+                } catch (displayError) {
+                    console.error('显示错误信息失败:', displayError);
+                    // 如果DOM操作失败，使用alert显示错误
+                    alert(`训练请求失败: ${error.message || '未知错误'}`);
+                }
+            });
+        }
+        
+        // 更新单个文件上传显示 - 确保使用正确的元素ID
+        function updateSingleFileDisplay() {
+            const fileInput = document.getElementById('single-file-input');
+            const textElement = document.getElementById('single-file-text');
+            
+            if (fileInput && textElement) {
+                if (fileInput.files.length > 0) {
+                    textElement.textContent = `已选择: ${fileInput.files[0].name}`;
+                    textElement.classList.add('file-selected');
+                } else {
+                    textElement.textContent = '点击或拖拽单个图片文件到此处上传';
+                    textElement.classList.remove('file-selected');
+                }
+            }
+        }
+        
+        // 更新文件夹上传显示
+        function updateFolderFileDisplay() {
+            const fileInput = document.getElementById('folder-file-input');
+            const fileDisplay = document.getElementById('folder-file-display');
+            
+            // 添加null检查以避免错误
+            if (!fileInput || !fileDisplay) return;
+            
+            const fileCount = fileInput.files.length;
+            
+            if (fileCount > 0) {
+                fileDisplay.textContent = `已选择 ${fileCount} 个文件`;
+                fileDisplay.classList.add('file-selected');
+            } else {
+                fileDisplay.textContent = '请选择多个图片文件';
+                fileDisplay.classList.remove('file-selected');
+            }
+        }
+        
+        // 初始化上传表单处理
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.querySelector('.upload-form');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', function(e) {
+                    const singleFileInput = document.getElementById('single-file-input');
+                    const folderFileInput = document.getElementById('folder-file-input');
+                    
+                    // 检查是否选择了文件
+                    let hasFiles = false;
+                    let fileCount = 0;
+                    
+                    if (singleFileInput && singleFileInput.files.length > 0) {
+                        hasFiles = true;
+                        fileCount = 1;
+                    } else if (folderFileInput && folderFileInput.files.length > 0) {
+                        hasFiles = true;
+                        fileCount = folderFileInput.files.length;
+                    }
+                    
+                    // 表单验证
+                    if (!hasFiles) {
+                        alert('请选择至少一个文件');
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // 如果是文件夹上传且文件数量较多，显示提示
+                    if (fileCount > 20) {
+                        if (!confirm(`您选择了 ${fileCount} 个文件，批量处理可能需要较长时间。确定要继续吗？`)) {
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                    
+                    // 显示加载状态
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<span><div class="loading"></div>处理中...</span>';
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.8';
+                    }
+                });
             }
         });
         
-        // 表单提交动画
-        document.querySelector('.upload-form').addEventListener('submit', function() {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span><div class="loading"></div>处理中...</span>';
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.8';
-        });
-        
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ 
-                        behavior: 'smooth' 
+        // 初始化训练表单处理
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM已加载，开始初始化训练表单处理');
+            
+            // 防止重复初始化的标记
+            let trainingFormsInitialized = false;
+            
+            // 添加一个直接的函数来初始化训练表单
+            function initTrainingForm() {
+                // 只初始化一次，避免表单数量不断增加
+                if (trainingFormsInitialized) {
+                    console.log('训练表单已经初始化过，跳过');
+                    return;
+                }
+                
+                console.log('尝试初始化训练表单...');
+                // 获取页面上所有的训练表单
+                const trainingForms = document.querySelectorAll('.training-form');
+                console.log('找到的训练表单数量:', trainingForms.length);
+                
+                // 为每个训练表单添加事件监听器
+                trainingForms.forEach(form => {
+                    console.log('处理训练表单:', form);
+                    
+                    // 不再克隆表单，直接添加事件监听器
+                    // 检查表单是否已有初始化标记
+                    if (form.hasAttribute('data-initialized')) {
+                        console.log('表单已初始化，跳过');
+                        return;
+                    }
+                    
+                    // 添加初始化标记
+                    form.setAttribute('data-initialized', 'true');
+                    
+                    // 移除可能存在的onsubmit属性
+                    form.removeAttribute('onsubmit');
+                    
+                    // 添加新的事件监听器
+                    form.addEventListener('submit', function(e) {
+                        console.log('训练表单提交事件被触发!');
+                        e.preventDefault(); // 立即阻止默认提交行为
+                        
+                        // 在当前表单内查找文件输入元素
+                        const fileInput = this.querySelector('input[type="file"]');
+                        console.log('训练数据输入元素:', fileInput);
+                        
+                        if (!fileInput) {
+                            console.error('未找到训练数据输入元素');
+                            alert('系统错误：未找到训练数据输入元素');
+                            return;
+                        }
+                        
+                        const file = fileInput.files[0];
+                        console.log('选中的训练数据文件:', file ? file.name : '无文件');
+                        
+                        // 表单验证
+                        if (!file) {
+                            alert('请选择训练数据集文件');
+                            return;
+                        }
+                        
+                        // 验证文件类型
+                        if (!file.name.toLowerCase().endsWith('.zip')) {
+                            alert('请上传ZIP格式的数据集文件');
+                            return;
+                        }
+                        
+                        // 显示确认提示
+                        if (!confirm('开始模型训练？训练过程可能需要较长时间，请确保系统资源充足。')) {
+                            return;
+                        }
+                        
+                        // 调用异步处理函数
+                        if (typeof handleTrainingFormSubmit === 'function') {
+                            console.log('调用handleTrainingFormSubmit函数');
+                            handleTrainingFormSubmit.call(this, e);
+                        } else {
+                            console.error('handleTrainingFormSubmit函数未定义');
+                            alert('系统错误：训练处理函数未定义');
+                        }
+                    });
+                    
+                    console.log('训练表单初始化完成');
+                });
+                
+                // 为提交按钮添加点击事件监听
+                attachButtonListeners();
+                
+                // 如果找到了训练表单，标记为已初始化
+                if (trainingForms.length > 0) {
+                    trainingFormsInitialized = true;
+                    console.log('训练表单初始化标记已设置');
+                } else {
+                    console.warn('未找到训练表单，稍后再尝试初始化');
+                    // 设置最多重试5次，每次间隔递增
+                    if (window.trainingFormRetries === undefined) {
+                        window.trainingFormRetries = 0;
+                    }
+                    
+                    if (window.trainingFormRetries < 5) {
+                        window.trainingFormRetries++;
+                        const delay = 500 * window.trainingFormRetries; // 递增延迟时间
+                        console.log(`第${window.trainingFormRetries}次重试，延迟${delay}ms`);
+                        setTimeout(initTrainingForm, delay);
+                    } else {
+                        console.error('达到最大重试次数，停止尝试初始化训练表单');
+                    }
+                }
+            }
+            
+            // 为提交按钮添加直接的点击事件监听作为备用方案
+            function attachButtonListeners() {
+                const submitButtons = document.querySelectorAll('.training-form button[type="submit"], .training-form input[type="submit"]');
+                console.log('找到的提交按钮数量:', submitButtons.length);
+                
+                submitButtons.forEach(button => {
+                    // 检查按钮是否已有初始化标记
+                    if (button.hasAttribute('data-initialized')) {
+                        console.log('按钮已初始化，跳过');
+                        return;
+                    }
+                    
+                    // 添加初始化标记
+                    button.setAttribute('data-initialized', 'true');
+                    
+                    console.log('为按钮添加点击监听器:', button);
+                    
+                    // 直接添加点击事件，不克隆按钮
+                    button.addEventListener('click', function(e) {
+                        console.log('提交按钮被直接点击!');
+                        
+                        // 找到包含该按钮的表单
+                        const form = this.closest('.training-form');
+                        if (form) {
+                            console.log('找到关联的表单，触发表单提交');
+                            // 阻止默认行为
+                            e.preventDefault();
+                            
+                            // 直接获取表单中的文件输入
+                            const fileInput = form.querySelector('input[type="file"]');
+                            
+                            if (!fileInput) {
+                                console.error('未找到训练数据输入元素');
+                                alert('系统错误：未找到训练数据输入元素');
+                                return;
+                            }
+                            
+                            const file = fileInput.files[0];
+                            
+                            // 表单验证
+                            if (!file) {
+                                alert('请选择训练数据集文件');
+                                return;
+                            }
+                            
+                            // 验证文件类型
+                            if (!file.name.toLowerCase().endsWith('.zip')) {
+                                alert('请上传ZIP格式的数据集文件');
+                                return;
+                            }
+                            
+                            // 显示确认提示
+                            if (!confirm('开始模型训练？训练过程可能需要较长时间，请确保系统资源充足。')) {
+                                return;
+                            }
+                            
+                            // 调用异步处理函数
+                            if (typeof handleTrainingFormSubmit === 'function') {
+                                console.log('通过按钮直接调用handleTrainingFormSubmit函数');
+                                // 创建一个事件对象
+                                const submitEvent = new Event('submit', { cancelable: true });
+                                // 调用处理函数
+                                handleTrainingFormSubmit.call(form, submitEvent);
+                            } else {
+                                console.error('handleTrainingFormSubmit函数未定义');
+                                alert('系统错误：训练处理函数未定义');
+                            }
+                        } else {
+                            // 阻止按钮的默认行为
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    // 确保按钮可以点击（移除任何可能的禁用样式）
+                    button.disabled = false;
+                    button.style.pointerEvents = 'auto';
+                    button.style.opacity = '1';
+                    button.style.cursor = 'pointer';
+                });
+            }
+            
+            // 为标签页按钮添加事件监听器
+            function setupTabListeners() {
+                const detectionTab = document.getElementById('detection-tab');
+                const trainingTab = document.getElementById('training-tab');
+                
+                if (detectionTab) {
+                    // 移除现有的所有监听器，避免重复绑定
+                    const newDetectionTab = detectionTab.cloneNode(true);
+                    detectionTab.parentNode.replaceChild(newDetectionTab, detectionTab);
+                    
+                    // 添加新的点击事件
+                    newDetectionTab.addEventListener('click', function() {
+                        console.log('检测标签页被点击，切换到检测界面');
+                        switchTab('detection');
                     });
                 }
+                
+                if (trainingTab) {
+                    // 移除现有的所有监听器，避免重复绑定
+                    const newTrainingTab = trainingTab.cloneNode(true);
+                    trainingTab.parentNode.replaceChild(newTrainingTab, trainingTab);
+                    
+                    // 添加新的点击事件
+                    newTrainingTab.addEventListener('click', function() {
+                        console.log('训练标签页被点击，切换到训练界面');
+                        switchTab('training');
+                        
+                        // 延迟初始化训练表单，确保训练面板已经创建
+                        setTimeout(() => {
+                            // 重置初始化标记，以便重新初始化新创建的表单
+                            trainingFormsInitialized = false;
+                            initTrainingForm();
+                        }, 300);
+                    });
+                }
+            }
+            
+            // 立即设置标签页监听器
+            setupTabListeners();
+            
+            // 页面加载完成后，默认显示检测界面
+            window.addEventListener('load', function() {
+                console.log('页面加载完成，默认显示检测界面');
+                switchTab('detection');
             });
+            
+            // 立即调用一次switchTab确保初始状态正确
+            setTimeout(() => {
+                switchTab('detection');
+            }, 100);
+            
+            // 添加对动态内容变化的监听
+            const observer = new MutationObserver(function(mutations) {
+                let shouldReinitialize = false;
+                
+                mutations.forEach(function(mutation) {
+                    // 检查是否有新的训练表单被添加
+                    const addedForms = Array.from(mutation.addedNodes).filter(node => 
+                        node.nodeType === 1 && (node.classList.contains('training-form') || node.querySelector('.training-form'))
+                    );
+                    
+                    if (addedForms.length > 0) {
+                        console.log('检测到新的表单元素被添加到DOM');
+                        shouldReinitialize = true;
+                    }
+                });
+                
+                if (shouldReinitialize) {
+                    // 重置初始化标记，以便重新初始化
+                    trainingFormsInitialized = false;
+                    // 延迟一下，确保新元素完全加载
+                    setTimeout(initTrainingForm, 200);
+                }
+            });
+            
+            // 开始观察整个文档的变化
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            // 额外的定期检查，确保按钮可以点击
+            setInterval(function() {
+                const buttons = document.querySelectorAll('.training-form button[type="submit"]:not([data-initialized]), .training-form input[type="submit"]:not([data-initialized])');
+                
+                if (buttons.length > 0) {
+                    console.log('发现未初始化的按钮，添加监听器:', buttons.length);
+                    attachButtonListeners();
+                } else {
+                    // 确保所有按钮都是可点击的
+                    const allButtons = document.querySelectorAll('.training-form button[type="submit"], .training-form input[type="submit"]');
+                    allButtons.forEach(button => {
+                        if (button.disabled || button.style.pointerEvents === 'none' || button.style.opacity < '1') {
+                            console.log('发现被禁用的按钮，尝试启用:', button);
+                            button.disabled = false;
+                            button.style.pointerEvents = 'auto';
+                            button.style.opacity = '1';
+                            button.style.cursor = 'pointer';
+                        }
+                    });
+                }
+            }, 3000); // 每3秒检查一次
+            
+            // 立即执行初始化
+            initTrainingForm();
+            
+            console.log('训练表单初始化逻辑设置完成');
         });
     </script>
 </body>
