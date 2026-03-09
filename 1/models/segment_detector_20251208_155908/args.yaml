@@ -1,0 +1,5 @@
+batch_size: 4
+epochs: 5
+image_size: 512
+learning_rate: 0.001
+timestamp: '20251208_155908'

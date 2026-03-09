@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据集结构调试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            color: #444;
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .issue {
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数据集结构调试工具</h1>
+        
+        <form action="/debug_dataset_structure" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="dataset">选择数据集ZIP文件：</label>
+                <input type="file" name="dataset" id="dataset" accept=".zip" required>
+            </div>
+            <button type="submit">分析数据集结构</button>
+        </form>
+        
+        {% if result %}
+        <div class="result">
+            <h2>分析结果</h2>
+            
+            <div class="section">
+                <h3>解压目录基本信息</h3>
+                <p><strong>解压目录：</strong>{{ result.extract_dir }}</p>
+                <p><strong>根目录内容：</strong></p>
+                <pre>{{ result.root_contents|tojson(indent=2) }}</pre>
+            </div>
+            
+            {% if result.has_dataset_dir %}
+            <div class="section">
+                <h3>Dataset子目录信息</h3>
+                <p><strong>Dataset目录内容：</strong></p>
+                <pre>{{ result.dataset_contents|tojson(indent=2) }}</pre>
+                
+                {% if result.dataset_structure %}
+                <p><strong>Dataset子目录结构：</strong></p>
+                <pre>{{ result.dataset_structure|tojson(indent=2) }}</pre>
+                
+                {% if result.train_images_dir %}
+                <p><strong>训练图像目录：</strong>{{ result.train_images_dir }}</p>
+                {% endif %}
+                {% if result.train_masks_dir %}
+                <p><strong>训练掩码目录：</strong>{{ result.train_masks_dir }}</p>
+                {% endif %}
+                {% if result.val_images_dir %}
+                <p><strong>验证图像目录：</strong>{{ result.val_images_dir }}</p>
+                {% endif %}
+                {% if result.val_masks_dir %}
+                <p><strong>验证掩码目录：</strong>{{ result.val_masks_dir }}</p>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if result.direct_train_contents or result.direct_val_contents %}
+            <div class="section">
+                <h3>直接train/val目录信息</h3>
+                {% if result.direct_train_contents %}
+                <p><strong>直接train目录内容：</strong></p>
+                <pre>{{ result.direct_train_contents|tojson(indent=2) }}</pre>
+                {% endif %}
+                {% if result.direct_val_contents %}
+                <p><strong>直接val目录内容：</strong></p>
+                <pre>{{ result.direct_val_contents|tojson(indent=2) }}</pre>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if result.found_images_dirs %}
+            <div class="section">
+                <h3>找到的Images目录</h3>
+                {% for images_dir in result.found_images_dirs %}
+                <div>
+                    <p><strong>路径：</strong>{{ images_dir.path }}</p>
+                    <p><strong>文件数量：</strong>{{ images_dir.count }}</p>
+                    <p><strong>样例文件：</strong></p>
+                    <pre>{{ images_dir.sample_files|tojson(indent=2) }}</pre>
+                </div>
+                <hr>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if result.found_masks_dirs %}
+            <div class="section">
+                <h3>找到的Masks目录</h3>
+                {% for masks_dir in result.found_masks_dirs %}
+                <div>
+                    <p><strong>路径：</strong>{{ masks_dir.path }}</p>
+                    <p><strong>文件数量：</strong>{{ masks_dir.count }}</p>
+                    <p><strong>样例文件：</strong></p>
+                    <pre>{{ masks_dir.sample_files|tojson(indent=2) }}</pre>
+                </div>
+                <hr>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if result.potential_issues %}
+            <div class="section">
+                <h3>潜在问题 <span class="issue">(请关注)</span></h3>
+                <ul>
+                    {% for issue in result.potential_issues %}
+                    <li class="issue">{{ issue }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

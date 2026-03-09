@@ -22,7 +22,7 @@ DETECTION_CONF_THRESHOLD = 0.05  # 更低的置信度阈值，进一步提高检
 DETECTION_IOU_THRESHOLD = 0.2    # 更低的IOU阈值，更好地适应重叠裂缝
 DETECTION_IMGSZ = 640            # 与训练一致的图像大小
 MAX_DETECTIONS = 300             # 增加最大检测数量
-MULTI_SCALE = True               # 启用多尺度检测以提高小目标检测效果
+SCALE = 0.5                      # 使用scale参数代替multi_scale，值为0.5表示多尺度检测
 
 def preprocess_image_for_segmentation(img_path, target_size=(576, 576)):
     """预处理图像用于分割模型，使用模型期望的576x576尺寸"""
@@ -325,32 +325,36 @@ def apply_detection(img_path, result_path, params=None):
         device = '0' if torch.cuda.is_available() else 'cpu'
         print(f"使用设备: {'GPU' if device == '0' else 'CPU'}")
         
+        # 调试：检查原始图像路径
+        print(f"DEBUG: 原始图像路径: {img_path}")
+        print(f"DEBUG: 原始图像是否存在: {os.path.exists(img_path)}")
+        
         # 加载原始图像进行预处理
         original_img = cv2.imread(img_path)
         if original_img is None:
             return False, "无法读取输入图像"
         
-        # 图像预处理增强对比度，有助于检测小裂缝
-        # 创建预处理版本的图像路径
-        temp_path = img_path.replace('.', '_preprocessed.')
+        # 图像预处理增强对比度，有助于检测小裂缝（在内存中处理，不保存临时文件）
         # 应用自适应直方图均衡化以增强对比度
         gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         enhanced_gray = clahe.apply(gray)
         # 转换回彩色图像格式以保持与模型兼容
         enhanced_img = cv2.cvtColor(enhanced_gray, cv2.COLOR_GRAY2BGR)
-        cv2.imwrite(temp_path, enhanced_img)
         
-        # 使用增强后的图像进行检测，使用用户指定的参数
+        # 调试：图像预处理完成，图像形状: {enhanced_img.shape}
+        print(f"DEBUG: 图像预处理完成，增强后图像形状: {enhanced_img.shape}")
+        
+        # 直接使用内存中的增强图像进行检测，使用用户指定的参数
         results = model(
-            temp_path,
+            enhanced_img,
             conf=conf_threshold,
             iou=iou_threshold,
             imgsz=img_size,
             max_det=max_detections,
             device=device,
             augment=True,  # 启用测试时增强
-            multi_scale=MULTI_SCALE,  # 使用多尺度检测
+            scale=SCALE,  # 使用scale参数进行多尺度检测
             classes=None  # 不限制检测类别
         )
         
@@ -375,20 +379,48 @@ def apply_detection(img_path, result_path, params=None):
                 # 重新构建结果以只包含通过NMS的框
                 results[0].boxes = results[0].boxes[indices.flatten()]
         
-        # 保存带检测结果的图像
-        results[0].save(result_path)
+        # 手动绘制检测结果并保存图像
+        result_img = enhanced_img.copy()  # 使用增强后的图像作为基础
         
-        # 加载保存的图像并添加缺陷计数信息
-        result_img = cv2.imread(result_path)
-        if result_img is not None:
-            # 添加英文缺陷计数文本
+        # 绘制检测框
+        boxes = results[0].boxes
+        for box in boxes:
+            # 获取边界框坐标
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            # 获取类别ID和置信度
+            class_id = int(box.cls)
+            confidence = float(box.conf)
+            # 获取类别名称
+            class_name = label_mapping.get(class_id, f"Class {class_id}")
+            
+            # 绘制边界框 (红色)
+            cv2.rectangle(result_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            
+            # 绘制标签和置信度
+            label = f"{class_name}: {confidence:.2f}"
             font = cv2.FONT_HERSHEY_SIMPLEX
-            defect_count = len(results[0].boxes)
-            status_text = f"Defects: {defect_count}" if defect_count > 0 else "No defects"
-            cv2.putText(result_img, status_text, (20, 30), 
-                       font, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
-            # 重新保存带有计数信息的图像
-            cv2.imwrite(result_path, result_img)
+            font_scale = 0.5
+            font_color = (255, 255, 255)
+            background_color = (0, 0, 255)
+            
+            # 获取文本尺寸
+            text_size = cv2.getTextSize(label, font, font_scale, 1)[0]
+            # 绘制背景矩形
+            cv2.rectangle(result_img, (x1, y1 - text_size[1] - 5), 
+                         (x1 + text_size[0], y1), background_color, -1)
+            # 绘制文本
+            cv2.putText(result_img, label, (x1, y1 - 5), 
+                       font, font_scale, font_color, 1, cv2.LINE_AA)
+        
+        # 添加缺陷计数信息
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        defect_count = len(boxes)
+        status_text = f"Defects: {defect_count}" if defect_count > 0 else "No defects"
+        cv2.putText(result_img, status_text, (20, 30), 
+                   font, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
+        
+        # 保存结果图像
+        cv2.imwrite(result_path, result_img)
         
         # 获取检测信息
         detections = []
@@ -399,9 +431,7 @@ def apply_detection(img_path, result_path, params=None):
                 'bbox': box.xyxy[0].tolist()
             })
         
-        # 清理临时文件
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        # 不再使用临时文件，所以不需要清理
         
         defect_count = len(detections)
         print(f"检测完成，发现 {defect_count} 个潜在裂缝")

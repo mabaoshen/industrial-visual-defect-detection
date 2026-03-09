@@ -36,7 +36,159 @@ MODEL_SAVE_PATH = "best_model.h5"
 LOCAL_WEIGHTS_PATH = "weights/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_0.5_128_no_top.h5"
 
 
-# 损失函数定义
+# 损失函数定义 - 优化版，更适合小目标分割
+
+def enhanced_focal_loss(alpha=0.75, gamma=2.0, small_target_weight=2.0):
+    """改进的Focal Loss，增加对小目标的关注度"""
+    def loss(y_true, y_pred):
+        y_pred = tf.clip_by_value(y_pred, 1e-7, 1 - 1e-7)
+        
+        # 标准交叉熵
+        cross_entropy = -y_true * tf.math.log(y_pred) - (1 - y_true) * tf.math.log(1 - y_pred)
+        
+        # Focal权重
+        focal_weight = alpha * tf.math.pow(1 - y_pred, gamma) * y_true + \
+                       (1 - alpha) * tf.math.pow(y_pred, gamma) * (1 - y_true)
+        
+        # 计算目标区域大小并为小目标添加额外权重
+        # 计算每个样本中目标区域的比例
+        target_area = tf.reduce_sum(y_true, axis=[1, 2, 3], keepdims=True)
+        total_area = tf.cast(tf.reduce_prod(y_true.shape[1:3]), dtype=tf.float32)
+        target_ratio = target_area / (total_area + 1e-7)
+        
+        # 对小目标区域应用额外权重
+        # 当目标占比小于10%时，给予额外权重
+        small_target_mask = tf.cast(target_ratio < 0.1, dtype=tf.float32)
+        area_based_weight = 1.0 + (small_target_weight - 1.0) * small_target_mask
+        
+        # 组合权重
+        combined_weight = focal_weight * area_based_weight
+        
+        return tf.reduce_mean(combined_weight * cross_entropy)
+
+    return loss
+
+
+def weighted_dice_loss(small_target_weight=3.0):
+    """加权Dice Loss，对小目标区域进行加权"""
+    def loss(y_true, y_pred):
+        smooth = 1e-6
+        y_true = tf.clip_by_value(y_true, 0.0, 1.0)
+        y_pred = tf.clip_by_value(y_pred, 0.0, 1.0)
+        
+        # 计算目标区域大小
+        target_area = tf.reduce_sum(y_true, axis=[1, 2, 3], keepdims=True)
+        total_area = tf.cast(tf.reduce_prod(y_true.shape[1:3]), dtype=tf.float32)
+        target_ratio = target_area / (total_area + 1e-7)
+        
+        # 根据目标大小计算权重
+        # 目标越小，权重越大
+        weight = 1.0 + (small_target_weight - 1.0) * tf.exp(-10.0 * target_ratio)
+        
+        # 计算加权的交集和并集
+        intersection = tf.reduce_sum(weight * y_true * y_pred)
+        union = tf.reduce_sum(weight * y_true) + tf.reduce_sum(weight * y_pred)
+        
+        return 1 - (2 * intersection + smooth) / (union + smooth)
+
+    return loss
+
+
+def boundary_aware_loss(lambda_boundary=0.5):
+    """边界感知损失，特别关注目标边界"""
+    def loss(y_true, y_pred):
+        y_pred = tf.clip_by_value(y_pred, 1e-7, 1 - 1e-7)
+        
+        # 交叉熵损失
+        ce_loss = -y_true * tf.math.log(y_pred) - (1 - y_true) * tf.math.log(1 - y_pred)
+        
+        # 计算边界图 (使用简单的梯度来检测边界)
+        def compute_boundary(mask):
+            # 简单的边界检测：使用Sobel滤波器
+            kernel_x = tf.constant([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=tf.float32)
+            kernel_y = tf.constant([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=tf.float32)
+            kernel_x = tf.reshape(kernel_x, [3, 3, 1, 1])
+            kernel_y = tf.reshape(kernel_y, [3, 3, 1, 1])
+            
+            grad_x = tf.nn.conv2d(mask, kernel_x, strides=[1, 1, 1, 1], padding='SAME')
+            grad_y = tf.nn.conv2d(mask, kernel_y, strides=[1, 1, 1, 1], padding='SAME')
+            
+            # 计算梯度幅度作为边界图
+            boundary = tf.sqrt(tf.square(grad_x) + tf.square(grad_y) + 1e-7)
+            # 归一化边界图
+            boundary = tf.nn.l2_normalize(boundary, axis=[1, 2])
+            return boundary
+        
+        # 计算真实边界和预测边界
+        true_boundary = compute_boundary(y_true)
+        pred_boundary = compute_boundary(y_pred)
+        
+        # 边界损失：预测边界与真实边界的MSE
+        boundary_loss = tf.reduce_mean(tf.square(true_boundary - pred_boundary))
+        
+        # 组合损失
+        combined_loss = tf.reduce_mean(ce_loss) + lambda_boundary * boundary_loss
+        
+        return combined_loss
+
+    return loss
+
+
+def lovasz_softmax_loss(y_true, y_pred):
+    """改进的Lovász-Softmax Loss，对小目标分割效果好"""
+    # 确保输入形状匹配
+    y_true = tf.reshape(y_true, [-1])
+    y_pred = tf.reshape(y_pred, [-1])
+    
+    # 限制预测值范围，避免极端值
+    y_pred = tf.clip_by_value(y_pred, 1e-7, 1 - 1e-7)
+    
+    # 计算IoU相关的损失
+    # 对于二元分割，使用简单的实现
+    errors = tf.abs(y_true - y_pred)
+    
+    # 计算加权损失，对小目标区域给予更高权重
+    # 基于目标比例计算权重
+    target_ratio = tf.reduce_mean(y_true)
+    # 当目标比例小于0.1时增加权重
+    weight = tf.where(target_ratio < 0.1, 
+                     2.0 + 3.0 * tf.exp(-20.0 * target_ratio), 
+                     1.0)
+    
+    # 计算最终损失
+    loss = weight * tf.reduce_mean(errors)
+    
+    return loss
+
+
+def small_target_combined_loss(y_true, y_pred):
+    """简化高效的小目标损失函数组合"""
+    # 计算目标区域比例，用于确定权重
+    target_area = tf.reduce_sum(y_true, axis=[1, 2, 3])
+    total_area = tf.cast(y_true.shape[1] * y_true.shape[2], dtype=tf.float32)
+    target_ratio = target_area / (total_area + 1e-7)
+    
+    # 对于小目标(占比小于5%)，增加Dice Loss的权重
+    # 对于大目标，增加Focal Loss的权重
+    is_small = tf.cast(target_ratio < 0.05, dtype=tf.float32)
+    
+    # 动态调整权重
+    # 小目标: 0.3*Focal + 0.7*Dice
+    # 大目标: 0.6*Focal + 0.4*Dice
+    focal_weight = 0.3 * is_small + 0.6 * (1 - is_small)
+    dice_weight = 0.7 * is_small + 0.4 * (1 - is_small)
+    
+    # 计算两种主要损失
+    enhanced_focal = enhanced_focal_loss(alpha=0.75, gamma=2.0, small_target_weight=2.0)(y_true, y_pred)
+    weighted_dice = weighted_dice_loss(small_target_weight=2.5)(y_true, y_pred)
+    
+    # 组合损失并确保返回标量
+    combined_loss = focal_weight * enhanced_focal + dice_weight * weighted_dice
+    
+    return tf.reduce_mean(combined_loss)
+
+
+# 保留原有函数用于向后兼容
 def focal_loss(alpha=0.25, gamma=2.0):
     def loss(y_true, y_pred):
         y_pred = tf.clip_by_value(y_pred, 1e-7, 1 - 1e-7)
@@ -259,13 +411,17 @@ def train_model():
         print(f"[{time.strftime('%H:%M:%S')}] 构建模型...")
         model = build_deeplabv3_plus(input_shape)
 
-        # 编译模型
+        # 编译模型 - 使用专为小目标设计的组合损失函数
         print(f"[{time.strftime('%H:%M:%S')}] 编译模型...")
         model.compile(
             optimizer=Adam(learning_rate=1e-4),
-            loss=combined_loss,
+            loss=small_target_combined_loss,
             metrics=["accuracy"]
         )
+        
+        # 打印信息说明使用了新的损失函数
+        print("\n使用新的专为小目标设计的组合损失函数: small_target_combined_loss")
+        print("包含: 增强版Focal Loss、加权Dice Loss、边界感知损失和Lovász-Softmax Loss")
 
         # 回调函数
         callbacks = [

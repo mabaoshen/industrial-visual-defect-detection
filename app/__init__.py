@@ -16,17 +16,19 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB文件大小限制
 app.config['SESSION_COOKIE_SECURE'] = False  # 允许在HTTP上使用会话cookie
 app.config['PREFERRED_URL_SCHEME'] = 'http'  # 优先使用HTTP
 
-# 确保必要的目录存在
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['SEGMENTATION_RESULT_FOLDER'], exist_ok=True)
-os.makedirs(app.config['DETECTION_RESULT_FOLDER'], exist_ok=True)
-
 # 导入路由
 from app import routes
 
 # 导入模型加载函数
 from app.model_loader import load_models
 
-# 在应用启动时加载模型
+# 在应用启动时加载模型和创建目录
 with app.app_context():
     load_models()
+    # 确保必要的目录存在
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['SEGMENTATION_RESULT_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['DETECTION_RESULT_FOLDER'], exist_ok=True)
+    # 创建对比结果目录
+    comparison_folder = os.path.join(app.config['STATIC_FOLDER'], 'comparison_results')
+    os.makedirs(comparison_folder, exist_ok=True)

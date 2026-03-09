@@ -22,6 +22,17 @@ def load_segmentation_model():
     try:
         # 确保路径正确
         if os.path.exists(SEGMENTATION_MODEL_PATH):
+            # 验证HDF5文件格式
+            try:
+                with open(SEGMENTATION_MODEL_PATH, 'rb') as f:
+                    # HDF5文件的魔数是b'\x89HDF\r\n\x1a\n'
+                    magic_number = f.read(8)
+                    if magic_number != b'\x89HDF\r\n\x1a\n':
+                        raise ValueError("不是有效的HDF5文件格式")
+            except Exception as e:
+                print(f"HDF5文件验证失败: {str(e)}")
+                return
+                
             # 直接使用TensorFlow加载模型，并设置compile=False避免自定义损失函数问题
             import tensorflow as tf
             segmentation_model = tf.keras.models.load_model(SEGMENTATION_MODEL_PATH, compile=False)
@@ -29,71 +40,66 @@ def load_segmentation_model():
         else:
             print(f"未找到分割模型文件: {SEGMENTATION_MODEL_PATH}")
     except Exception as e:
-        print(f"加载分割模型时出错: {str(e)}")
+        # 提供更友好的错误信息
+        if 'invalid load key' in str(e) or 'HDF5' in str(e):
+            print(f"加载分割模型时出错: 模型文件可能已损坏或不是有效的HDF5格式")
+        else:
+            print(f"加载分割模型时出错: {str(e)}")
 
 def load_detection_model():
     """加载目标检测模型 - 完全使用Ultralytics官方API"""
     global detection_model
     
-    # 使用绝对路径确保文件定位准确
-    model_path = os.path.join('2', 'models', 'crack_detector_optimized', 'weights', 'best.pt')
+    # 首先尝试加载默认模型路径
+    default_model_path = os.path.join('2', 'models', 'crack_detector_optimized', 'weights', 'best.pt')
     
-    # 第一步：检查路径是否存在，输出详细信息帮助调试
-    if not os.path.exists(model_path):
-        print(f"❌ 模型路径不存在: {model_path}")
-        print(f"当前工作目录: {os.getcwd()}")
-        # 尝试检查不同可能的路径变体
-        alt_path1 = os.path.join('d:', 'pythonCode', '工业检测', '2', 'models', 'crack_detector_optimized', 'weights', 'best.pt')
-        if os.path.exists(alt_path1):
-            print(f"✅ 发现替代路径: {alt_path1}")
-            model_path = alt_path1
-        else:
-            print(f"❌ 替代路径也不存在: {alt_path1}")
-        return None
+    # 定义所有可能的模型路径，优先使用最新的优化模型
+    model_paths = [
+        default_model_path,
+        os.path.join('2', 'models', 'crack_detector_optimized3', 'weights', 'best.pt'),
+        os.path.join('2', 'models', 'crack_detector_optimized2', 'weights', 'best.pt'),
+        os.path.join('2', 'models', 'pretrained', 'yolov8n.pt')  # 使用预训练模型作为最后的备选
+    ]
     
-    print(f"✅ 模型文件存在: {model_path}")
-    
-    # 第二步：完全使用Ultralytics官方API加载模型
-    try:
-        # 使用Ultralytics官方YOLO类，这是推荐的官方API使用方式
-        # YOLO类内部会处理所有与PyTorch版本兼容性相关的问题
-        print("正在使用Ultralytics官方API加载YOLO模型...")
-        detection_model = YOLO(model_path, task='detect')
-        print("✅ YOLO检测模型加载成功")
+    # 遍历所有可能的模型路径，尝试加载第一个可用的模型
+    for model_path in model_paths:
+        # 检查路径是否存在
+        if not os.path.exists(model_path):
+            print(f"❌ 模型路径不存在: {model_path}")
+            continue
         
-        # 验证模型是否可用
+        # 验证.pt文件格式（检查文件是否为空）
+        if os.path.getsize(model_path) == 0:
+            print(f"❌ 模型文件为空: {model_path}")
+            continue
+        
+        print(f"✅ 发现模型文件: {model_path}")
+        
         try:
-            # 进行简单的模型验证
-            model_info = detection_model.info()
-            print(f"✅ 模型验证成功: {model_info}")
-        except Exception as verify_error:
-            print(f"⚠️  模型加载成功但验证时出错: {str(verify_error)}")
-            # 即使验证出错，我们仍然返回模型，因为可能只是某些方法不可用
+            # 使用Ultralytics官方YOLO类加载模型
+            print("正在使用Ultralytics官方API加载YOLO模型...")
+            detection_model = YOLO(model_path, task='detect')
+            print(f"✅ 成功加载模型: {model_path}")
             
-        return detection_model
-    except Exception as e:
-        print(f"❌ YOLO模型加载失败: {str(e)}")
-        
-        # 尝试加载模型的不同版本
-        print("尝试加载替代模型变体...")
-        model_variants = [
-            os.path.join('2', 'models', 'crack_detector_optimized2', 'weights', 'best.pt'),
-            os.path.join('2', 'models', 'crack_detector_optimized3', 'weights', 'best.pt'),
-            os.path.join('2', 'models', 'pretrained', 'best.pt')
-        ]
-        
-        for variant in model_variants:
-            if os.path.exists(variant):
-                print(f"尝试加载替代模型: {variant}")
-                try:
-                    detection_model = YOLO(variant, task='detect')
-                    print(f"✅ 成功加载替代模型: {variant}")
-                    return detection_model
-                except Exception as variant_error:
-                    print(f"❌ 替代模型加载失败: {str(variant_error)}")
-        
-        print("❌ 所有模型变体都加载失败")
-        return None
+            # 验证模型是否可用
+            try:
+                model_info = detection_model.info()
+                print(f"✅ 模型验证成功")
+            except Exception as verify_error:
+                print(f"⚠️  模型加载成功但验证时出错: {str(verify_error)}")
+                # 即使验证出错，我们仍然使用模型
+            
+            return detection_model
+        except Exception as e:
+            error_msg = str(e)
+            if 'invalid load key' in error_msg:
+                print(f"❌ 加载模型失败: 模型文件可能已损坏或格式错误 ({model_path})")
+            else:
+                print(f"❌ 加载模型失败: {error_msg}")
+            continue
+    
+    print("❌ 所有模型路径都无法加载成功")
+    return None
 
 def load_models():
     """加载所有模型，确保即使部分模型加载失败应用也能运行"""

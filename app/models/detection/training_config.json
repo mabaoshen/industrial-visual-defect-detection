@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-11-11 01:26:29",
+  "timestamp": "2026-02-28 18:55:15",
   "training_type": "detection",
   "params": {
-    "epochs": 100,
+    "epochs": 10,
     "batch_size": 4,
     "learning_rate": 0.0001,
     "image_size": 640
@@ -11,9 +11,9 @@
     "0": "liefeng"
   },
   "results": {
-    "loss": 0.123,
-    "accuracy": 92.5,
-    "f1_score": 0.897
+    "loss": 2.1301,
+    "accuracy": 32.907,
+    "f1_score": 0.40880917788793675
   },
-  "model_save_path": "2\\models\\crack_detector_20251111_012627\\weights\\best.pt"
+  "model_save_path": "2\\models\\crack_detector_20260228_184734\\weights\\best.pt"
 }

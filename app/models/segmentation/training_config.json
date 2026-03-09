@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-11-11 01:30:16",
+  "timestamp": "2026-02-28 19:10:41",
   "training_type": "segmentation",
   "params": {
-    "epochs": 50,
-    "batch_size": 4,
+    "epochs": 10,
+    "batch_size": 8,
     "learning_rate": 0.001,
     "image_size": 512
   },
@@ -11,10 +11,20 @@
     "0": "liefeng"
   },
   "results": {
-    "loss": 0.087,
-    "accuracy": 94.2,
-    "miou": 0.876,
-    "f1_score": 0.912
+    "loss": 0.009463373571634293,
+    "accuracy": 99.8948872089386,
+    "val_loss": 0.008130989037454128,
+    "val_accuracy": 99.90791082382202,
+    "miou": 0.5594113683700561,
+    "f1_score": 0.7991590976715088,
+    "precision": 0.0016195040815879893,
+    "recall": 0.030654515327257662,
+    "best_threshold": 0.01,
+    "prediction_mean": 0.001461717882193625,
+    "prediction_max": 0.3759550154209137,
+    "mask_coverage": 0.030654515327257662,
+    "combined_score": 0.01364693098771139,
+    "mask_positive_ratio": 0.000920867919921875
   },
-  "model_save_path": "1\\trained_model_20251111_013014.h5"
+  "model_save_path": "1\\models\\segment_detector_20260228_185820\\weights\\best.h5"
 }
