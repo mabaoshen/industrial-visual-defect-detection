@@ -1,0 +1,9 @@
+# 训练集和验证集图像路径
+train: C:\Users\Administrator\AppData\Local\Temp\tmpfdy0ngb3\extracted\dataset\images
+val: C:\Users\Administrator\AppData\Local\Temp\tmpfdy0ngb3\extracted\dataset\images
+
+# 类别数量（只有裂缝一个类别）
+nc: 1
+
+# 类别名称
+names: [ 'liefeng' ]
