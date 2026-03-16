@@ -1514,7 +1514,7 @@ def train_model():
                     threshold_results.append(metrics)
                     
                     # 更新最佳指标
-                    if combined_score > best_combined_score:
+                    if combined_score > best_combined_score or best_metrics is None:
                         best_combined_score = combined_score
                         best_metrics = metrics
                         best_threshold = threshold
